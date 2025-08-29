@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext.jsx";
 
 export default function DefaultLayout({ children }) {
   const { user, isAdmin, logout } = useAuth();
@@ -14,8 +14,12 @@ export default function DefaultLayout({ children }) {
           <NavLink to="/events">Événements</NavLink>
           {user && <NavLink to="/profile">Mon profil</NavLink>}
           {isAdmin && <NavLink to="/admin">Admin</NavLink>}
+
           {!user ? (
-            <NavLink to="/login">Connexion</NavLink>
+            <>
+              <NavLink to="/login">Connexion</NavLink>
+              <NavLink to="/register">Créer un compte</NavLink>
+            </>
           ) : (
             <button className="menu__logout" onClick={logout}>Se déconnecter</button>
           )}
@@ -23,7 +27,6 @@ export default function DefaultLayout({ children }) {
       </aside>
 
       <main className="content">
-        {/* Bannière commune */}
         <div className="banner">
           <div className="banner__overlay" />
           <div className="banner__inner">

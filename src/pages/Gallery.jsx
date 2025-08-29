@@ -1,105 +1,130 @@
-import { useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { addImage, listGallery, removeImage, updateImage } from "../lib/storage";
-import "../styles/gallery.css";
+mport { useEffect, useState } from "react";
+import { useAuth } from "../contexts/AuthContext.jsx";
+import api from "../lib/api";
+import "../styles/gallery.css"; // optionnel
 
 export default function Gallery() {
   const { user, isAdmin } = useAuth();
-  const [items, setItems] = useState(listGallery());
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState("");
+
+  // Form
+  const [url, setUrl] = useState("");
+  const [file, setFile] = useState(null);
   const [caption, setCaption] = useState("");
   const [busy, setBusy] = useState(false);
 
-  async function handleFile(e) {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-    setBusy(true);
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const { data } = await api.get("/gallery");
+        setItems(data || []);
+      } catch (e) {
+        setErr(msg(e));
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  async function onSubmit(e) {
+    e.preventDefault();
+    if (!user) { setErr("Connecte-toi pour publier une image."); return; }
+    if (!file && !url.trim()) { setErr("Choisis un fichier ou entre une URL."); return; }
+
+    setBusy(true); setErr("");
     try {
-      const dataUrl = await fileToDataUrl(file);
-      addImage({ dataUrl, caption, uploadedBy: user.id });
-      setCaption("");
-      setItems(listGallery());
-      e.target.value = "";
+      const fd = new FormData();
+      if (file) fd.append("file", file);
+      if (url.trim()) fd.append("url", url.trim());
+      if (caption.trim()) fd.append("caption", caption.trim());
+
+      const { data } = await api.post("/gallery", fd);
+      setItems((cur) => [data, ...cur]);
+      // reset
+      setUrl(""); setFile(null); setCaption("");
+      e.target.reset();
+    } catch (e) {
+      setErr(msg(e));
     } finally {
       setBusy(false);
     }
   }
 
-  function handleRemove(id, uploadedBy) {
+  async function remove(item) {
     if (!user) return;
-    if (isAdmin || user.id === uploadedBy) {
-      removeImage(id);
-      setItems(listGallery());
-    } else {
-      alert("Tu ne peux supprimer que tes images (ou être admin).");
+    const isOwner = item.uploadedBy === user._id || item.uploadedBy === user.id;
+    if (!isOwner && !isAdmin) return alert("Tu ne peux supprimer que tes images (ou être admin).");
+    if (!confirm("Supprimer cette image ?")) return;
+    try {
+      await api.delete(`/gallery/${item._id || item.id}`);
+      setItems((cur) => cur.filter((x) => (x._id || x.id) !== (item._id || item.id)));
+    } catch (e) {
+      setErr(msg(e));
     }
-  }
-
-  async function handleEditCaption(img) {
-    if (!user) return;
-    if (!(isAdmin || user.id === img.uploadedBy)) return;
-    const next = prompt("Nouvelle légende :", img.caption || "");
-    if (next === null) return;
-    updateImage(img.id, { caption: next.trim() });
-    setItems(listGallery());
   }
 
   return (
     <section className="page">
       <h2>Galerie</h2>
-
-      {!user && <p className="muted">Connecte-toi pour ajouter des images.</p>}
+      {err && <p className="error" style={{ marginBottom: 8 }}>{err}</p>}
 
       {user && (
-        <div className="gallery__uploader">
-          <label className="upload">
-            <input type="file" accept="image/*" onChange={handleFile} hidden disabled={busy}/>
-            <span>+ Ajouter une image</span>
+        <form className="form" onSubmit={onSubmit} encType="multipart/form-data" noValidate>
+          <label>URL (optionnel)
+            <input
+              className="event-url"
+              placeholder="https://…"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              disabled={busy}
+            />
           </label>
-          <input
-            className="caption"
-            placeholder="Légende (prise au moment de l’upload)"
-            value={caption}
-            onChange={(e)=>setCaption(e.target.value)}
-            disabled={busy}
-          />
-        </div>
+
+          <label>Fichier (optionnel)
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              disabled={busy}
+            />
+          </label>
+
+          <label>Légende (optionnel)
+            <input value={caption} onChange={(e) => setCaption(e.target.value)} disabled={busy} />
+          </label>
+
+          <button disabled={busy}>Publier</button>
+        </form>
       )}
 
-      {!items.length ? (
-        <p>Aucune image pour l’instant.</p>
+      {loading ? (
+        <p>Chargement…</p>
+      ) : items.length === 0 ? (
+        <p>Aucune image pour le moment.</p>
       ) : (
-        <div className="gallery">
-          {items.map(img => {
-            const canEdit = isAdmin || (user && user.id === img.uploadedBy);
-            const text = img.caption || (canEdit ? "Ajouter une légende…" : "");
-            return (
-              <figure key={img.id} className="gallery__item">
-                <img src={img.dataUrl} alt={img.caption || "Image de la galerie"} />
-                <figcaption className="gallery__caption">
-                  <span>{text}</span>
-                  <span className="gallery__actions">
-                    {canEdit && (
-                      <button onClick={()=>handleEditCaption(img)} aria-label="Éditer" title="Éditer la légende">✎</button>
-                    )}
-                    {canEdit && (
-                      <button onClick={()=>handleRemove(img.id, img.uploadedBy)} aria-label="Supprimer" title="Supprimer">✕</button>
-                    )}
-                  </span>
-                </figcaption>
-              </figure>
-            );
-          })}
-        </div>
+        <ul className="grid" style={{ marginTop: 16 }}>
+          {items.map((it) => (
+            <li key={it._id || it.id} className="card">
+              <div className="card__frame">
+                <img src={it.url} alt={it.caption || ""} className="card__img" loading="lazy" />
+              </div>
+              <div className="card__body">
+                <p className="card__subtitle" style={{ margin: 0 }}>{it.caption}</p>
+                {(isAdmin || (user && (it.uploadedBy === user._id || it.uploadedBy === user.id))) && (
+                  <button style={{ marginTop: 8 }} onClick={() => remove(it)}>Supprimer</button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
     </section>
   );
 }
 
-function fileToDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const fr = new FileReader();
-    fr.onload = () => resolve(fr.result);
-    fr.onerror = reject;
-    fr.readAsDataURL(file);
-  });
+function msg(e) {
+  return e?.response?.data?.error || e.message || "Erreur réseau";
 }

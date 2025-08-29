@@ -1,30 +1,39 @@
+// src/pages/Login.jsx
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const [form, setForm] = useState({ username: "", password: "" });
-  const [err, setErr] = useState("");
   const { login } = useAuth();
   const nav = useNavigate();
+  const [username, setU] = useState("");
+  const [password, setP] = useState("");
+  const [err, setErr] = useState("");
 
-  function submit(e) {
+  async function onSubmit(e) {
     e.preventDefault();
-    try { login(form); nav("/profile"); } catch (e) { setErr(e.message); }
+    setErr("");
+    try {
+      await login(username, password);
+      nav("/"); // redirige où tu veux
+    } catch (e) {
+      setErr(e?.response?.data?.error || "Erreur de connexion");
+    }
   }
 
   return (
     <section className="page">
       <h2>Connexion</h2>
       {err && <p className="error">{err}</p>}
-      <form className="form" onSubmit={submit}>
-        <input placeholder="Identifiant du jeu" value={form.username}
-               onChange={e=>setForm(f=>({...f,username:e.target.value}))}/>
-        <input type="password" placeholder="Mot de passe" value={form.password}
-               onChange={e=>setForm(f=>({...f,password:e.target.value}))}/>
+      <form className="form" onSubmit={onSubmit}>
+        <label>Identifiant
+          <input value={username} onChange={(e)=>setU(e.target.value)} />
+        </label>
+        <label>Mot de passe
+          <input type="password" value={password} onChange={(e)=>setP(e.target.value)} />
+        </label>
         <button>Se connecter</button>
       </form>
-      <p>Nouveau ? <Link to="/register">Créer un compte</Link></p>
     </section>
   );
 }

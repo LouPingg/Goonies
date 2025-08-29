@@ -1,64 +1,63 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import {
-  findUserByUsername, upsertUser, getSession, setSession, clearSession, getUserById,
-  isAllowed
-} from "../lib/storage";
+// src/contexts/AuthContext.jsx
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import api from "../lib/api";
 
-const AuthContext = createContext(null);
-export function useAuth() { return useContext(AuthContext); }
+const AuthCtx = createContext(null);
+const TOKEN_KEY = "goonies_token";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const sess = getSession();
-    setUser(sess ? getUserById(sess.userId) : null);
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) { setReady(true); return; }
+    api.get("/users/me")
+      .then(res => setUser(res.data))
+      .catch(() => { localStorage.removeItem(TOKEN_KEY); setUser(null); })
+      .finally(() => setReady(true));
   }, []);
 
-  function register({ username, password }) {
-    if (!username || !password) throw new Error("Champs requis");
-    if (findUserByUsername(username)) throw new Error("Identifiant déjà utilisé");
-
-    // 🔒 vérif allowlist
-    if (!isAllowed(username)) {
-      throw new Error("Cet identifiant n’a pas été autorisé par l’admin.");
-    }
-
-    const newUser = {
-      id: crypto.randomUUID(),
-      username,
-      password, // demo
-      displayName: username,
-      avatarUrl: `https://picsum.photos/seed/${encodeURIComponent(username)}/300/300`,
-      titles: [],
-      role: "member"
-    };
-    upsertUser(newUser);
-    setSession(newUser.id);
-    setUser(newUser);
+  function setAuthFromResponse({ token, user }) {
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+    setUser(user);
   }
 
-  function login({ username, password }) {
-    const u = findUserByUsername(username);
-    if (!u || u.password !== password) throw new Error("Identifiants invalides");
-    setSession(u.id);
-    setUser(u);
+  async function login(username, password) {
+    const res = await api.post("/auth/login", { username, password });
+    setAuthFromResponse(res.data);
+    return res.data.user;
   }
 
-  function logout() { clearSession(); setUser(null); }
-
-  function updateProfile(patch) {
-    if (!user) return;
-    const updated = { ...user, ...patch };
-    upsertUser(updated);
-    setUser(updated);
+  async function register(username, password) {
+    const res = await api.post("/auth/register", { username, password });
+    setAuthFromResponse(res.data);
+    return res.data.user;
   }
 
-  const isAdmin = user?.role === "admin";
+  function logout() {
+    localStorage.removeItem(TOKEN_KEY);
+    setUser(null);
+  }
 
-  return (
-    <AuthContext.Provider value={{ user, isAdmin, register, login, logout, updateProfile }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  async function updateProfile(patch) {
+    const res = await api.patch("/users/me", patch);
+    setUser(res.data);
+    return res.data;
+  }
+
+  const isAdmin = !!user && user.role === "admin";
+
+  const value = useMemo(() => ({
+    user, ready, isAdmin,
+    login, register, logout, updateProfile,
+  }), [user, ready, isAdmin]);
+
+  return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthCtx);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
 }

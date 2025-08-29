@@ -1,4 +1,4 @@
-mport { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import api from "../lib/api";
 import "../styles/gallery.css"; // optionnel
@@ -109,8 +109,26 @@ export default function Gallery() {
           {items.map((it) => (
             <li key={it._id || it.id} className="card">
               <div className="card__frame">
-                <img src={it.url} alt={it.caption || ""} className="card__img" loading="lazy" />
-              </div>
+  <img
+  src={it.url}
+  alt={it.caption || ""}
+  className="card__img"
+  loading="lazy"
+  onError={(e) => {
+    const el = e.currentTarget;
+    el.style.display = "none";
+    const box = document.createElement("div");
+    box.className = "card__placeholder";
+    box.textContent = "Image indisponible";
+    box.style.cssText = `
+      width:100%;height:100%;display:grid;place-items:center;
+      font-size:12px;color:#6d7a8a;background:#0b1016;border:1px dashed #2a303a;
+    `;
+    el.parentElement.appendChild(box);
+    console.warn("Image failed to load:", it.url);
+  }}
+/>
+</div>
               <div className="card__body">
                 <p className="card__subtitle" style={{ margin: 0 }}>{it.caption}</p>
                 {(isAdmin || (user && (it.uploadedBy === user._id || it.uploadedBy === user.id))) && (

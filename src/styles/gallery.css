@@ -39,3 +39,5 @@
 .gallery__actions { display: inline-flex; gap: 8px; }
 .gallery__caption button[aria-label="Éditer"] { color: #9ecbff; }
 .gallery__caption button[aria-label="Éditer"]:hover { color: #c7e1ff; }
+.card__frame { position: relative; }
+.card__img { display: block; width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 1; }

@@ -10,6 +10,8 @@ import Gallery from "./pages/Gallery.jsx";
 import Events from "./pages/Events.jsx";
 import Profile from "./pages/Profile.jsx";
 import Admin from "./pages/Admin.jsx";
+import Forgot from "./pages/Forgot.jsx";
+import ResetPassword from "./pages/ResetPassword.jsx";
 
 function Protected({ children, admin = false }) {
   const { user, ready, isAdmin } = useAuth();
@@ -42,6 +44,8 @@ export default function App() {
         <Route path="/gallery" element={<Protected><Gallery /></Protected>} />
         <Route path="/events" element={<Protected><Events /></Protected>} />
         <Route path="/profile" element={<Protected><Profile /></Protected>} />
+        <Route path="/forgot" element={<Forgot />} />
+<Route path="/reset-password" element={<ResetPassword />} />
 
         {/* admin */}
         <Route path="/admin" element={<Protected admin><Admin /></Protected>} />

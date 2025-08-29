@@ -1,26 +1,13 @@
-// Fuseau du visiteur (ex: "Europe/Paris", "America/New_York")
-export function getUserTimeZone() {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+export function localDateTimeToUTCISO(dateStr, timeStr) {
+  // "YYYY-MM-DD", "HH:MM" -> ISO UTC
+  const local = new Date(`${dateStr}T${timeStr}:00`);
+  return local.toISOString();
 }
 
-// Convertit une saisie <input type="datetime-local"> (locale) -> timestamp UTC (ms)
-export function localDatetimeToUTCms(localStr) {
-  // "YYYY-MM-DDTHH:mm" interprété en local par JS => Date stocke en ms UTC
-  const d = new Date(localStr);
-  return d.getTime();
-}
-
-// Formate un timestamp UTC pour le visiteur (dans SON fuseau)
-export function formatUTCForUser(ts, opts = {}) {
-  const tz = getUserTimeZone();
-  const fmt = new Intl.DateTimeFormat(undefined, {
-    timeZone: tz,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    ...opts,
-  });
-  return fmt.format(new Date(ts));
+export function formatLocal(isoUtc) {
+  const d = new Date(isoUtc);
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(d);
 }

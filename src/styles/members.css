@@ -1,0 +1,117 @@
+/* === Classeur Pokémon (page Members) === */
+
+/* hauteur homogène d’un slot, responsive */
+:root { --slot-h: clamp(300px, 28vw, 420px); }
+
+.binder {
+  position: relative;
+  border-radius: 18px;
+  padding: 24px 28px;
+  background:
+    linear-gradient(135deg, #0c0f14 0%, #0c0f14 40%, #0e131a 100%),
+    radial-gradient(1200px 600px at 0% 100%, #0b0f15 0%, transparent 60%);
+  border: 1px solid #1b212a;
+  box-shadow: inset 0 1px 0 #1a1f27, 0 10px 30px rgba(0,0,0,0.35);
+}
+
+/* anneaux décor */
+.binder__ring {
+  position: absolute; left: 12px; top: 24px; bottom: 24px; width: 20px;
+  background:
+    radial-gradient(closest-side, #8c99a8, #6b7786 60%, #3e4651),
+    radial-gradient(closest-side, #8c99a8, #6b7786 60%, #3e4651),
+    radial-gradient(closest-side, #8c99a8, #6b7786 60%, #3e4651);
+  background-repeat: no-repeat;
+  background-position: center 15%, center 50%, center 85%;
+  background-size: 16px 16px, 16px 16px, 16px 16px;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.4));
+}
+
+.binder__sheet {
+  position: relative;
+  margin-left: 24px;
+  padding: 16px;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.04) 0 2px, transparent 2px 6px),
+    #0f141a;
+  border: 1px solid #1f2631;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.35);
+}
+
+/* 3x3 fixe (pagi 9 par page) */
+.pockets { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+/* Chaque pochette a EXACTEMENT la même hauteur */
+.pocket {
+  position: relative;
+  border-radius: 12px;
+  padding: 10px;
+  height: var(--slot-h);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)),
+    #0b1016;
+  border: 1px solid #2a303a;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.02),
+    inset 0 6px 18px rgba(255,255,255,0.03),
+    0 8px 18px rgba(0,0,0,0.35);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.pocket:hover {
+  transform: translateY(-2px);
+  border-color: #3a4350;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.04),
+    inset 0 10px 24px rgba(255,255,255,0.05),
+    0 16px 28px rgba(0,0,0,0.45);
+}
+
+/* reflet plastique */
+.pocket__shine {
+  pointer-events: none;
+  position: absolute; inset: 0; border-radius: 12px;
+  background:
+    linear-gradient(120deg, rgba(255,255,255,0.075) 0%, rgba(255,255,255,0) 35%),
+    radial-gradient(60% 30% at 80% -10%, rgba(255,255,255,0.08), transparent 60%);
+  mix-blend-mode: screen;
+}
+
+/* Carte à l’intérieur: occupe toute la hauteur disponible */
+.pocket .card { height: 100%; display: flex; flex-direction: column; background:#11161d; border-color:#232a36; box-shadow:0 6px 14px rgba(0,0,0,0.35); }
+.pocket .card__frame { flex: 1 1 auto; min-height: 0; border-radius: 10px; overflow: hidden; }
+
+/* Slots vides: même taille + style */
+.pocket--empty {
+  height: var(--slot-h);
+  display: block;
+  border: 1px dashed #3a4350;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)),
+    #0b1016;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.02),
+    inset 0 6px 18px rgba(255,255,255,0.03),
+    0 8px 18px rgba(0,0,0,0.25);
+  opacity: .6;
+  position: relative;
+}
+.pocket--empty::after {
+  content: "+";
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 22px; letter-spacing: .05em; color: #6d7a8a;
+}
+
+/* Pager */
+.pager {
+  margin-top: 14px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px;
+}
+.pager__arrow {
+  background: #0f141a; border: 1px solid #333; color: var(--text);
+  padding: 8px 12px; border-radius: 10px; cursor: pointer;
+}
+.pager__arrow:hover { background: #2b3138; }
+.pager__dots { display: flex; justify-content: center; align-items: center; list-style: none; gap: 8px; margin: 0; padding: 0; }
+.pager__dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #3a4350; background: #0f141a; cursor: pointer; }
+.pager__dot.is-active { background: #2f81f7; border-color: #2f81f7; }

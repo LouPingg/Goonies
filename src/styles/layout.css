@@ -1,0 +1,32 @@
+/* Layout principal */
+.layout { min-height: 100vh; }
+.content { padding: 24px; margin-left: var(--sidebar-collapsed); transition: margin-left .2s; }
+
+/* Sidebar (hover pour ouvrir) */
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--sidebar-collapsed);
+  background: var(--panel); transition: width .2s; z-index: 5; border-right: 1px solid #222;
+}
+.sidebar:hover { width: var(--sidebar-expanded); }
+.menu { display: flex; flex-direction: column; gap: 8px; padding: 16px; }
+.menu a {
+  text-decoration: none; color: var(--text); opacity: .85;
+  padding: 10px 12px; border-radius: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.menu a.active, .menu a:hover { background: #2b3138; opacity: 1; }
+.menu__logout {
+  margin-top: 8px; text-align: left; background: transparent; border: 0; color: var(--text);
+  padding: 10px 12px; border-radius: 10px; cursor: pointer;
+}
+.menu__logout:hover { background: #2b3138; }
+
+/* Banner commune (images dans /public) */
+.banner {
+  position: relative; height: 320px;
+  background-image: url("/image.png"); /* remplace par /goonies-bg.jpg si tu veux */
+  background-size: cover; background-position: center;
+  border-radius: 16px; overflow: hidden; margin-left: calc(var(--sidebar-collapsed) * -1);
+}
+.banner__overlay { position: absolute; inset: 0; background: linear-gradient(180deg,#00000055,#000000aa); }
+.banner__inner { position: relative; z-index: 1; height: 100%; display: grid; place-items: center; text-align: center; padding: 0 16px; }
+.banner__logo { width: 96px; height: 96px; object-fit: contain; margin-bottom: 8px; }

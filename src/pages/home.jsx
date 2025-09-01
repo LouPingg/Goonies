@@ -1,109 +1,149 @@
 // src/pages/Home.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import api from "../lib/api";
 import { formatUTCForUser } from "../lib/time";
 import { useCountdown } from "../lib/countdown";
+import CatButton from "../components/CatButton";
 import "../styles/home.css";
 
 export default function Home() {
   const { user, isAdmin } = useAuth();
-  const [ev, setEv] = useState(null);
-  const [upcoming, setUpcoming] = useState(false);
+  const [active, setActive] = useState([]);     // évènements en cours/actifs
+  const [future, setFuture] = useState([]);     // évènements à venir (triés)
   const [err, setErr] = useState("");
 
-  // Charger l'évènement à la une (actif sinon prochain)
+  // Charger actifs + tous, puis dériver “future”
   useEffect(() => {
     (async () => {
       try {
+        setErr("");
+        // actifs
         const act = await api.get("/events/active");
-        if (Array.isArray(act.data) && act.data.length > 0) {
-          setEv(act.data[0]);
-          setUpcoming(false);
-          return;
-        }
+        const actList = Array.isArray(act.data) ? act.data : [];
+        setActive(actList);
+
+        // tous (pour “future”)
         const all = await api.get("/events");
         const now = Date.now();
-        const future = (all.data || [])
+        const fut = (all.data || [])
           .filter(e => new Date(e.startAt).getTime() > now)
           .sort((a, b) => new Date(a.startAt) - new Date(b.startAt));
-        if (future.length > 0) {
-          setEv(future[0]);
-          setUpcoming(true);
-        } else {
-          setEv(null);
-          setUpcoming(false);
-        }
+        setFuture(fut);
       } catch (e) {
-        setErr(e?.response?.data?.error || e.message || "Erreur réseau");
+        setErr(e?.response?.data?.error || e.message || "Network error");
       }
     })();
   }, []);
 
-  const canRemove =
-    !!ev &&
-    !!user &&
-    (isAdmin || ev.createdBy === user._id || ev.createdBy === user.id);
+  // Évènement “featured” = le 1er actif, sinon le prochain à venir
+  const featured = useMemo(() => {
+    if (active.length > 0) return active[0];
+    return future[0] || null;
+  }, [active, future]);
 
-  // ✅ Hooks appelés SANS condition
-  const startCd = useCountdown(ev?.startAt, "until");
-  const endCd   = useCountdown(ev?.endAt,   "until");
+  // “upcoming extra” = 2 suivants (excluant le featured)
+  const upcomingExtras = useMemo(() => {
+    const list = [...future];
+    if (!featured) return list.slice(0, 2);
+    return list
+      .filter(e => (e._id || e.id) !== (featured._id || featured.id))
+      .slice(0, 2);
+  }, [future, featured]);
 
-  // Si l'event en cours se termine pendant qu'on est sur la page
-  useEffect(() => {
-    if (ev && !upcoming && endCd && endCd.done) setEv(null);
-  }, [ev, upcoming, endCd?.done]);
+  // droits
+  const canRemove = (ev) =>
+    !!ev && !!user && (isAdmin || ev.createdBy === user._id || ev.createdBy === user.id);
 
-  async function del() {
+  // compte à rebours pour le bloc “featured” uniquement
+  const startCd = useCountdown(featured?.startAt, "until");
+  const endCd   = useCountdown(featured?.endAt,   "until");
+
+  async function del(ev) {
     if (!ev) return;
-    if (!confirm("Supprimer cet évènement ?")) return;
+    if (!confirm("Delete this event?")) return;
     try {
       await api.delete(`/events/${ev._id || ev.id}`);
-      setEv(null);
-      setUpcoming(false);
+      const id = ev._id || ev.id;
+      setActive((cur) => cur.filter(x => (x._id||x.id) !== id));
+      setFuture((cur) => cur.filter(x => (x._id||x.id) !== id));
     } catch (e) {
-      setErr(e?.response?.data?.error || e.message || "Suppression impossible");
+      setErr(e?.response?.data?.error || e.message || "Delete failed");
     }
   }
 
   return (
     <section className="home">
-      {err && <p className="error" style={{ marginBottom: 8 }}>{err}</p>}
+      {err && <p className="error mb-8">{err}</p>}
 
-      {ev ? (
-        <div className="featured" style={{ maxWidth: 720, margin: "-140px auto 24px" }}>
-          {ev.imageUrl ? (
-            <img src={ev.imageUrl} alt={ev.title} className="featured__img" />
+      {/* === Featured (actif ou prochain) === */}
+      {featured ? (
+        <div className="featured">
+          {featured.imageUrl ? (
+            <img src={featured.imageUrl} alt={featured.title} className="featured__img" />
           ) : null}
 
-          <div className="featured__body" style={{ textAlign: "center" }}>
+          <div className="featured__body">
             <h3 className="featured__title">
-              {upcoming ? "À venir : " : ""}{ev.title}
+              {active.length === 0 ? "Upcoming: " : ""}{featured.title}
             </h3>
 
-            {(ev.description || ev.text) && (
-              <p className="featured__text">{ev.description || ev.text}</p>
+            {(featured.description || featured.text) && (
+              <p className="featured__text">{featured.description || featured.text}</p>
             )}
 
             <p className="featured__meta">
-              {upcoming ? (
-                <>Débute : {formatUTCForUser(ev.startAt)} • Dans : {startCd.label}</>
+              {active.length === 0 ? (
+                <>Starts: {formatUTCForUser(featured.startAt)} • In: {startCd.label}</>
               ) : (
-                <>Quand : {formatUTCForUser(ev.startAt)} • Se termine dans : {endCd.label}</>
+                <>When: {formatUTCForUser(featured.startAt)} • Ends in: {endCd.label}</>
               )}
             </p>
 
-            {canRemove && (
-              <button className="featured__remove" onClick={del}>
-                Supprimer
-              </button>
+            {canRemove(featured) && (
+              <CatButton
+                variant="delete"
+                size={72}
+                label="Delete"
+                onClick={() => del(featured)}
+                showLabel
+              />
             )}
           </div>
         </div>
       ) : (
-        <p className="muted" style={{ textAlign: "center" }}>
-          Aucun event à la une pour le moment.
-        </p>
+        <p className="muted text-center">No featured event right now.</p>
+      )}
+
+      {/* === (Option) afficher aussi 2 prochains évènements === */}
+      {upcomingExtras.length > 0 && (
+        <div className="featured-list">
+          {upcomingExtras.map(ev => (
+            <div key={ev._id || ev.id} className="featured">
+              {ev.imageUrl ? (
+                <img src={ev.imageUrl} alt={ev.title} className="featured__img" />
+              ) : null}
+
+              <div className="featured__body">
+                <h3 className="featured__title">Upcoming: {ev.title}</h3>
+                {(ev.description || ev.text) && (
+                  <p className="featured__text">{ev.description || ev.text}</p>
+                )}
+                <p className="featured__meta">Starts: {formatUTCForUser(ev.startAt)}</p>
+
+                {canRemove(ev) && (
+                  <CatButton
+                    variant="delete"
+                    size={72}
+                    label="Delete"
+                    onClick={() => del(ev)}
+                    showLabel
+                  />
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </section>
   );

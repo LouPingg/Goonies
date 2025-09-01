@@ -1,55 +1,111 @@
 import { useState } from "react";
-import { useAuth } from "../contexts/AuthContext.jsx";
 import { useNavigate, Link } from "react-router-dom";
+import api from "../lib/api";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Register() {
-  const { register } = useAuth();
   const nav = useNavigate();
-  const [username, setU] = useState("");
-  const [password, setP] = useState("");
-  const [confirm, setC] = useState("");
-  const [err, setErr] = useState("");
+  const auth = useAuth?.();
+  const setAuth = auth?.setAuth ?? null;
+
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm,  setConfirm]  = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err,  setErr]  = useState("");
 
   async function onSubmit(e) {
     e.preventDefault();
     setErr("");
-    if (!username.trim()) return setErr("Identifiant requis.");
-    if (!password) return setErr("Mot de passe requis.");
-    if (password !== confirm) return setErr("Les mots de passe ne correspondent pas.");
 
+    if (!username.trim() || !password) {
+      setErr("Please fill in all fields.");
+      return;
+    }
+    if (password.length < 6) {
+      setErr("Password must be at least 6 characters.");
+      return;
+    }
+    if (confirm !== password) {
+      setErr("Passwords do not match.");
+      return;
+    }
+
+    setBusy(true);
     try {
-      await register(username.trim(), password);
-      nav("/profile"); // ou "/"
+      const { data } = await api.post("/auth/register", {
+        username: username.trim(),
+        password,
+      });
+
+      if (data?.token) {
+        localStorage.setItem("goonies_token", data.token);
+      }
+      if (setAuth && data?.user) {
+        setAuth({ token: data.token, user: data.user });
+      }
+
+      nav("/");
     } catch (e) {
-      const msg = e?.response?.data?.error || "Erreur d'inscription";
-      setErr(msg);
+      setErr(e?.response?.data?.error || e.message || "Registration failed");
+    } finally {
+      setBusy(false);
     }
   }
 
   return (
     <section className="page">
-      <h2>Créer un compte</h2>
-      <p className="muted" style={{ marginTop: -6 }}>
-        Ton identifiant doit être **autorisé par l’admin** (allowlist).
-      </p>
+      <h2>Create an account</h2>
       {err && <p className="error">{err}</p>}
 
-      <form className="form" onSubmit={onSubmit} noValidate>
-        <label>Identifiant (même pseudo que dans le jeu)
-          <input value={username} onChange={(e)=>setU(e.target.value)} />
+      <form className="form form--grid" onSubmit={onSubmit} noValidate>
+        <label>Username (must be allowed by admin)
+          <input
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="e.g., Mikey"
+            autoComplete="username"
+            disabled={busy}
+            required
+          />
         </label>
-        <label>Mot de passe
-          <input type="password" value={password} onChange={(e)=>setP(e.target.value)} />
-        </label>
-        <label>Confirmer le mot de passe
-          <input type="password" value={confirm} onChange={(e)=>setC(e.target.value)} />
-        </label>
-        <button>Créer le compte</button>
-      </form>
 
-      <p style={{ marginTop: 8 }}>
-        Déjà un compte ? <Link to="/login">Se connecter</Link>
-      </p>
+        <label>Password
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="At least 6 characters"
+            autoComplete="new-password"
+            disabled={busy}
+            required
+          />
+        </label>
+
+        <label>Confirm password
+          <input
+            type="password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            placeholder="Repeat your password"
+            autoComplete="new-password"
+            disabled={busy}
+            required
+          />
+        </label>
+
+        <div className="field">
+          <div />
+          <div className="field__control" style={{ display: "flex", gap: 10 }}>
+            <button type="submit" disabled={busy}>
+              {busy ? "Creating…" : "Create account"}
+            </button>
+            <Link to="/login" className="btn-secondary" aria-label="Go to login">
+              Sign in
+            </Link>
+          </div>
+        </div>
+      </form>
     </section>
   );
 }

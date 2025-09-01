@@ -103,6 +103,11 @@
   font-size: 22px; letter-spacing: .05em; color: #6d7a8a;
 }
 
+
+
+.page { 
+  margin-right: 460px;
+}
 /* Pager */
 .pager {
   margin-top: 14px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px;
@@ -115,3 +120,39 @@
 .pager__dots { display: flex; justify-content: center; align-items: center; list-style: none; gap: 8px; margin: 0; padding: 0; }
 .pager__dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #3a4350; background: #0f141a; cursor: pointer; }
 .pager__dot.is-active { background: #2f81f7; border-color: #2f81f7; }
+
+.membercard__img { display:block; width:100%; height:auto; border-radius:14px; }
+.membercard__fallback { display:grid; place-items:center; padding:16px; border:1px dashed #2a303a; border-radius:14px; }
+.membercard__avatar { width:80px; height:80px; border-radius:50%; object-fit:cover; }
+.membercard__name { margin-top:8px; font-weight:600; opacity:.9; }
+
+/* Header: title + search stacked */
+.members_header {
+  display: flex;
+  flex-direction: column;   /* <— pile en colonne */
+  align-items: flex-start;  /* aligne le formulaire à gauche */
+
+  margin-bottom: 52px;
+  margin-top: 60px;
+  margin-right: 30px;
+}
+
+.members_header label {
+  gap: 20px;
+  display: flex;
+  align-items: center;
+}
+
+/* nettoie les marges du titre et borne la largeur du form */
+.members__header h1,
+.members__header h2 { margin: 20px; }
+
+.members__header .form {
+  max-width: 520px;
+  width: 100%;
+}
+
+/* un peu plus serré sur petits écrans */
+@media (max-width: 560px) {
+  .members__header { gap: 6px; margin-bottom: 10px; }
+}

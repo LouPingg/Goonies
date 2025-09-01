@@ -2,41 +2,49 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import TagInput from "../components/TagInput";
-import MemberCard from "../components/MemberCard";
+import CatButton from "../components/CatButton";
 import api from "../lib/api";
+
+const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 export default function Profile() {
   const { user, updateProfile } = useAuth();
 
-  // Snapshot des valeurs serveur pour pouvoir annuler
+  // Server snapshot
   const [serverUser, setServerUser] = useState(user || null);
 
-  // États éditables
+  // Editable state
   const [displayName, setDisplayName] = useState(user?.displayName || "");
-  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || "");
-  const [titles, setTitles] = useState(Array.isArray(user?.titles) ? user.titles : []);
+  const [avatarUrl,   setAvatarUrl]   = useState(user?.avatarUrl   || "");
+  const [titles,      setTitles]      = useState(Array.isArray(user?.titles) ? user.titles : []);
+  const [bio,         setBio]         = useState(user?.bio || "");
+  const [cardTheme,   setCardTheme]   = useState(user?.cardTheme || "yellow");
 
-  // Fichier local + preview
-  const [file, setFile] = useState(null);
+  // File + local preview + temporary Cloudinary URL
+  const [file, setFile]               = useState(null);
   const [filePreview, setFilePreview] = useState("");
+  const [tempAvatar, setTempAvatar]   = useState("");
 
   // UI
   const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
-  const [ok, setOk] = useState("");
+  const [err,  setErr]  = useState("");
+  const [ok,   setOk]   = useState("");
 
-  // Quand le contexte user change (ex: après reload), resynchroniser le snapshot serveur
+  // sync user -> local state
   useEffect(() => {
     if (!user) return;
     setServerUser(user);
     setDisplayName(user.displayName || "");
     setAvatarUrl(user.avatarUrl || "");
     setTitles(Array.isArray(user.titles) ? user.titles : []);
+    setBio(user.bio || "");
+    setCardTheme(user.cardTheme || "yellow");
     setFile(null);
     setFilePreview("");
+    setTempAvatar("");
   }, [user]);
 
-  // Gérer l'URL de preview du fichier
+  // local blob preview
   useEffect(() => {
     if (!file) { setFilePreview(""); return; }
     const url = URL.createObjectURL(file);
@@ -44,25 +52,16 @@ export default function Profile() {
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
-  // Données “live” pour l’aperçu de la carte
-  const previewMember = useMemo(() => ({
-    ...(serverUser || {}),
-    displayName: displayName || serverUser?.displayName || serverUser?.username,
-    avatarUrl: filePreview || avatarUrl || "",
-    titles: titles || [],
-  }), [serverUser, displayName, avatarUrl, filePreview, titles]);
-
-  // Détection de modifications
   function normTitles(a = []) { return a.filter(Boolean).map(s => s.trim()).join("|"); }
   const isDirty =
     (displayName !== (serverUser?.displayName || "")) ||
-    (avatarUrl !== (serverUser?.avatarUrl || "")) ||
+    (avatarUrl   !== (serverUser?.avatarUrl   || "")) ||
     (normTitles(titles) !== normTitles(serverUser?.titles || [])) ||
+    (bio        !== (serverUser?.bio        || "")) ||
+    (cardTheme  !== (serverUser?.cardTheme  || "yellow")) ||
     !!file;
 
-  if (!user) {
-    return <section className="page"><p>Connecte-toi pour voir ton profil.</p></section>;
-  }
+  if (!user) return <section className="page"><p>Please sign in to view your profile.</p></section>;
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -71,32 +70,31 @@ export default function Profile() {
     try {
       let me;
       if (file || avatarUrl.trim()) {
-        // PATCH multipart (fichier et/ou URL)
         const fd = new FormData();
         if (displayName.trim()) fd.append("displayName", displayName.trim());
-        if (avatarUrl.trim())  fd.append("avatarUrl", avatarUrl.trim());
-        if (file)              fd.append("file", file);
-        if (titles?.length)    fd.append("titles", JSON.stringify(titles));
+        if (avatarUrl.trim())   fd.append("avatarUrl",   avatarUrl.trim());
+        if (file)               fd.append("file",        file);
+        if (titles?.length)     fd.append("titles", JSON.stringify(titles));
+        fd.append("bio",        bio || "");
+        fd.append("cardTheme",  cardTheme || "yellow");
         const { data } = await api.patch("/users/me", fd);
         me = data;
       } else {
-        // PATCH JSON “léger”
         me = await updateProfile({
           displayName: displayName.trim() || undefined,
-          titles,
+          titles, bio, cardTheme,
         });
       }
-
-      // Resynchroniser le snapshot serveur + états
       setServerUser(me);
       setDisplayName(me.displayName || "");
       setAvatarUrl(me.avatarUrl || "");
       setTitles(Array.isArray(me.titles) ? me.titles : []);
-      setFile(null);
-      setFilePreview("");
-      setOk("Profil mis à jour.");
+      setBio(me.bio || "");
+      setCardTheme(me.cardTheme || "yellow");
+      setFile(null); setFilePreview(""); setTempAvatar("");
+      setOk("Profile updated.");
     } catch (e) {
-      setErr(e?.response?.data?.error || e.message || "Erreur");
+      setErr(e?.response?.data?.error || e.message || "Error");
     } finally {
       setBusy(false);
     }
@@ -107,68 +105,143 @@ export default function Profile() {
     setDisplayName(serverUser.displayName || "");
     setAvatarUrl(serverUser.avatarUrl || "");
     setTitles(Array.isArray(serverUser.titles) ? serverUser.titles : []);
-    setFile(null);
-    setFilePreview("");
+    setBio(serverUser.bio || "");
+    setCardTheme(serverUser.cardTheme || "yellow");
+    setFile(null); setFilePreview(""); setTempAvatar("");
     setErr(""); setOk("");
   }
 
-  return (
-    <section className="page">
-      <h2>Mon profil</h2>
-      {err && <p className="error">{err}</p>}
-      {ok && <p style={{ color: "#8fda8f" }}>{ok}</p>}
+  // Live preview
+  const previewUrl = useMemo(() => {
+    const params = new URLSearchParams();
+    params.set("theme", cardTheme || "yellow");
+    if ((displayName || "").trim()) params.set("name", displayName.trim());
+    if ((bio || "").trim())         params.set("bio", bio.trim());
+    (titles || []).filter(Boolean).forEach(t => params.append("tag", t));
+    const art =
+      (tempAvatar && tempAvatar.trim()) ||
+      (filePreview && filePreview.trim()) ||
+      (avatarUrl && avatarUrl.trim());
+    if (art) params.set("avatar", art);
+    params.set("w", "600");
+    params.set("v", String(Date.now()).slice(-8));
+    return `${API}/cards/preview.png?${params.toString()}`;
+  }, [displayName, bio, titles, cardTheme, avatarUrl, filePreview, tempAvatar]);
 
-      {/* 2 colonnes : formulaire / aperçu */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr minmax(260px, 340px)", gap: 16, alignItems: "start" }}>
-        {/* Form */}
-        <form className="form" onSubmit={onSubmit} encType="multipart/form-data" noValidate>
-          <label>Nom affiché
+  return (
+    <section className="page page--profile">
+      <h2 className="profile__title">My profile</h2>
+      {err && <p className="error">{err}</p>}
+      {ok && <p className="profile__ok">{ok}</p>}
+
+      <div className="profile-grid">
+        {/* Formulaire 2 colonnes */}
+        <form className="form form--grid" onSubmit={onSubmit} encType="multipart/form-data" noValidate>
+          <label>Display name
             <input value={displayName} onChange={(e)=>setDisplayName(e.target.value)} disabled={busy} />
           </label>
 
-          <div style={{ display: "grid", gap: 8 }}>
-            <label>URL avatar (optionnel)
-              <input
-                placeholder="https://…"
-                value={avatarUrl}
-                onChange={(e)=>setAvatarUrl(e.target.value)}
-                disabled={busy}
+          <label>Avatar URL (optional)
+            <input
+              placeholder="https://…"
+              value={avatarUrl}
+              onChange={(e)=>setAvatarUrl(e.target.value)}
+              disabled={busy}
+            />
+          </label>
+
+          <label>Or file (optional)
+            <input
+              type="file"
+              accept="image/*"
+              onChange={async (e) => {
+                const f = e.target.files?.[0] || null;
+                setFile(f);
+                setOk(""); setErr("");
+                setTempAvatar("");
+                if (!f) return;
+                try {
+                  const fd = new FormData();
+                  fd.append("file", f);
+                  const { data } = await api.post("/cards/preview-upload", fd);
+                  setTempAvatar(data?.url || "");
+                } catch (err) {
+                  setTempAvatar("");
+                  setErr(err?.response?.data?.error || err.message || "Preview upload failed");
+                }
+              }}
+              disabled={busy}
+            />
+          </label>
+
+          <label>Bio
+            <textarea
+              rows={4}
+              value={bio}
+              onChange={(e)=>setBio(e.target.value)}
+              placeholder="A few words about you…"
+              disabled={busy}
+            />
+          </label>
+
+          <div className="field">
+            <label>My titles (tags)</label>
+            <div className="field__control">
+              <TagInput value={titles} onChange={setTitles} />
+            </div>
+          </div>
+
+          <div className="field">
+            <label>Card theme</label>
+            <div className="field__control profile__themes">
+              {["yellow","blue","green","red"].map(k => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={()=>setCardTheme(k)}
+                  className={`theme-btn theme--${k}`}
+                  aria-pressed={cardTheme === k}
+                >
+                  {k}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="field profile-actions">
+            <label aria-hidden="true" />
+            <div className="field__control">
+              <CatButton
+                variant="save"
+                label="Save"
+                type="submit"
+                className="catbtn--s-84"
+                showLabel
+                disabled={busy || !isDirty}
               />
-            </label>
-
-            <label>Ou fichier (optionnel)
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e)=>setFile(e.target.files?.[0] || null)}
-                disabled={busy}
+              <CatButton
+                variant="cancel"
+                label="Cancel"
+                className="catbtn--s-84"
+                onClick={onCancel}
+                showLabel
+                disabled={busy || !isDirty}
               />
-            </label>
+            </div>
           </div>
-
-          <div>
-            <label>Mes titres (tags)</label>
-            <TagInput value={titles} onChange={setTitles} />
-          </div>
-
-          <div style={{ display: "flex", gap: 8 }}>
-            <button disabled={busy || !isDirty}>Enregistrer</button>
-            <button type="button" onClick={onCancel} disabled={busy || !isDirty} className="btn-secondary">
-              Annuler les changements
-            </button>
-          </div>
-
-          <p className="muted" style={{ margin: 0, opacity: .75 }}>
-            L’aperçu à droite se met à jour en direct. “Annuler” rétablit les valeurs actuelles du serveur.
-          </p>
         </form>
 
         {/* Aperçu live */}
-        <div>
-          <h3 style={{ margin: "0 0 8px" }}>Aperçu</h3>
-          <div className="pocket">
-            <div className="pocket__shine" />
-            <MemberCard member={previewMember} />
+        <div className="profile-preview">
+          <h3 className="profile-preview__title">Preview</h3>
+          <div className="profile-preview__card">
+            <img
+              src={previewUrl}
+              alt="Card preview"
+              className="profile-preview__img"
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         </div>
       </div>

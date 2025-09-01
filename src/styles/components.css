@@ -1,61 +1,459 @@
-/* Grilles génériques */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 16px; }
+/* ===========================
+   Composants réutilisables + utilitaires
+   =========================== */
 
-/* Carte membre */
-.card { background:#0f141a; border:1px solid #222; border-radius:16px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,.2); }
-.card__frame { aspect-ratio: 1/1; background:#111; display:grid; place-items:center; }
-.card__img { width:100%; height:100%; object-fit:cover; }
-.card__body { padding:12px; }
-.card__title { margin:0 0 4px; font-size:18px; font-weight:700; letter-spacing:.2px; }
-.card__subtitle { margin:0 0 8px; opacity:.7; font-size:13px; }
-.card__tags { display:flex; flex-wrap:wrap; gap:6px; list-style:none; margin:0; padding:0; }
-.tag { background:#1f6feb22; border:1px solid #1f6feb55; padding:4px 8px; border-radius:999px; font-size:12px; }
+/* (optionnel) responsive helpers importés en premier
+   pour que les règles ci-dessous gardent la priorité */
+@import "./responsive.css";
 
-/* Formulaires + erreurs */
-.form { display:grid; gap:10px; max-width:520px; }
-.form input, .form textarea { background:#0f141a; border:1px solid #333; border-radius:10px; padding:10px 12px; color:var(--text); }
-.form button { background:#2f81f7; border:0; color:white; padding:10px 12px; border-radius:10px; cursor:pointer; }
-.error { color:#ffaaa5; }
+/* ——— Utilitaires rapides ——— */
+.row{display:flex;align-items:center}
+.col{display:flex;flex-direction:column}
+.inline{display:inline-flex}
+.flex-1{flex:1}
+.items-center{align-items:center}
+.justify-between{justify-content:space-between}
+.justify-end{justify-content:flex-end}
+.cursor-zoom-in{cursor:zoom-in}
+.text-center{text-align:center}
 
-/* TagInput */
-.taginput { display:grid; gap:8px; }
-.taginput__list .tag { display:inline-flex; align-items:center; gap:6px; }
-.taginput__list .tag button { background:transparent; border:0; cursor:pointer; color:inherit; font-size:14px; }
+.gap-6{gap:6px}.gap-8{gap:8px}.gap-10{gap:10px}.gap-12{gap:12px}
+.mt-6{margin-top:6px}.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}
+.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}
+.w-520{max-width:520px}.w-640{max-width:640px}
+.form--narrow{max-width:520px}
 
-/* Listes administrables */
-.list { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 8px; max-width: 520px; }
-.list__item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border: 1px solid #333; border-radius: 10px; background: #0f141a; }
+.page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.auth{min-height:60vh;display:grid;place-items:center}
+.auth__card{width:min(640px,100%)}
+.muted{opacity:.75}
+.error{color:#ffaaa5}
 
-/* Upload avatar dans la page Profil */
-.avatar-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.avatar-url {
-  min-width: 240px; flex: 1 1 260px;
-  background:#0f141a; border:1px solid #333; border-radius:10px; padding:10px 12px; color:var(--text);
-}
-.avatar-file {
-  display: inline-block; padding: 10px 12px; border: 1px dashed #444; border-radius: 8px; cursor: pointer;
-  background: #0f141a; color: var(--text);
-}
-.avatar-file:hover { background: #2b3138; }
-
-.avatar-preview {
-  width: 96px; height: 96px; border-radius: 12px; overflow: hidden; border: 1px solid #222; background: #0f141a;
-}
-.avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
-.card__placeholder {
-  width: 100%; height: 100%;
-  display: grid; place-items: center;
-  font-size: 12px; color: #6d7a8a;
-  background: #0b1016; border: 1px dashed #2a303a;
-}
-
-/* dans styles/components.css par ex. */
-.btn-secondary {
-  background: #0f141a;
-  border: 1px solid #333;
-  color: var(--text);
-  padding: 10px 12px;
+/* ——— Boutons ——— */
+button,.btn,.btn-secondary{
+  font-size: 1.05rem;
+  padding: 10px 14px;
+  min-height: 44px;
   border-radius: 10px;
+}
+
+.btn{
+  background:#2f81f7; color:#fff;
+  border:1px solid #2f81f7;
+  cursor:pointer; transition:filter .15s ease;
+}
+.btn:hover{ filter:brightness(1.1); }
+
+.btn-secondary{
+  background:#0f141a; color:var(--text);
+  border:1px solid #333;
+  cursor:pointer;
+}
+.btn-secondary:hover{ background:#2b3138; }
+
+/* ——— Formulaires ——— */
+:root{
+  --fs-base: 17px;
+  --fs-label: 1rem;
+  --fs-input: 1.12rem;
+  --fs-placeholder: 1.12rem;
+}
+html, body { font-size: var(--fs-base); }
+
+.form{display:grid;gap:10px;max-width:680px}
+.form label{font-size:var(--fs-label)}
+.form input,.form textarea,.form select{
+  background:#243447;
+  border:1px solid transparent;
+  border-radius:12px;
+  color:var(--text);
+  font-size:var(--fs-input);
+  line-height:1.4;
+  padding:14px 16px;
+  min-height:48px;
+}
+.form input::placeholder,.form textarea::placeholder{
+  font-style:italic; font-size:var(--fs-placeholder); opacity:.85;
+}
+.form input::-webkit-input-placeholder,.form textarea::-webkit-input-placeholder{
+  font-style:italic; font-size:var(--fs-placeholder); opacity:.85;
+}
+
+
+.field__control button {
+  background-color: #531158;
+  color: white;
+  border: none;
+}
+
+.field__control .btn-secondary {
+  background-color: #531158;
+  color: white;
+  border: none;
+}
+
+.form--grid label,
+.form--grid .field{
+  display:grid;
+  grid-template-columns: 240px minmax(360px, 1fr);
+  align-items:center;
+  column-gap:16px;
+  margin:12px 0;
+  font-size: 25px;
+}
+.form--grid .field>.field__control{ justify-self:stretch; }
+
+@media (max-width:680px){
+  .form{ max-width:100% }
+  .form--grid label,
+  .form--grid .field{ grid-template-columns:1fr; }
+}
+
+/* ——— Listes administrables ——— */
+.list{list-style:none;margin:8px 0;padding:0;display:grid;gap:8px;max-width:520px}
+.list__item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border:1px solid #333;border-radius:10px;background:#0f141a}
+
+/* ——— Cards génériques ——— */
+.card{background:#0f141a;border:1px solid #222;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.card__frame{background:#111;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.card__img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;object-position:center;display:block}
+.card__body{padding:12px}
+.card__subtitle{margin:0 0 8px;opacity:.8;font-size:13px}
+
+/* Placeholder réutilisable (image cassée) */
+.card__placeholder{
+  width:100%;height:100%;display:grid;place-items:center;
+  font-size:12px;color:#6d7a8a;background:#0b1016;border:1px dashed #2a303a;
+}
+
+/* ——— CatButton (icône ronde) ———
+   • pas de fond/bordure
+   • taille via --s (pas de px fixes)
+   • classes .catbtn--s-XX et preset .catbtn--event
+*/
+.catbtn{
+  --s: 72px;
+  width: var(--s);
+  height: var(--s);
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transition: transform .08s ease;
+}
+.catbtn:hover{ transform: translateY(-1px) scale(1.03); }
+.catbtn:active{ transform: translateY(0) scale(.98); }
+.catbtn:disabled{ opacity:.6; pointer-events:none; }
+
+/* l’icône suit la taille du bouton */
+.catbtn__img{
+  width: 86%;
+  height: 86%;
+  object-fit: contain;
+  display: block;
+}
+.catbtn__fallback{ font-size:12px; padding:0 6px; text-align:center }
+
+/* label sous l’icône (si showLabel) */
+.catbtn-box{ display:inline-grid; place-items:center; gap:6px }
+.catbtn__label{ font-size:20px; font-weight:600; line-height:1.1; text-align:center; max-width:10rem }
+
+/* Tailles prédéfinies (si CatButton passe size → catbtn--s-XX) */
+.catbtn--s-40 { --s: 40px; }
+.catbtn--s-56 { --s: 56px; }
+.catbtn--s-60 { --s: 60px; }
+.catbtn--s-64 { --s: 64px; }
+.catbtn--s-72 { --s: 72px; }
+.catbtn--s-80 { --s: 80px; }
+.catbtn--s-84 { --s: 84px; }
+.catbtn--s-90 { --s: 90px; }
+.catbtn--s-96 { --s: 96px; }
+.catbtn--s-110{ --s:110px; }
+.catbtn--s-128{ --s:128px; }
+.catbtn--s-140{ --s:140px; }
+
+/* Preset pratique pour les events (plus gros) */
+.featured .catbtn--event { --s: 120px; }
+@media (min-width:1440px){
+  .featured .catbtn--event { --s: 140px; }
+}
+@media (max-width:375px){
+  .featured .catbtn--event { --s: 96px; }
+}
+
+/* ——— Featured (Home & EventCard unifiés) ——— */
+.featured{
+  margin:24px auto; max-width:900px;
+  background:#0f141a; border:1px solid #222; border-radius:16px; overflow:hidden;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+  display:grid; grid-template-columns:1fr 1fr;
+}
+.featured__img{width:100%;height:100%;min-height:240px;object-fit:cover}
+.featured__body{
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:50px;
+  text-align:center;
+}
+.featured__title{margin:0;font-size:30px}
+.featured__text{margin:0;line-height:1.5;font-size:30px}
+.featured__meta{margin:6px 0 0;opacity:.75;font-size:25px}
+.featured__remove{justify-self:start;background:#2f81f7;color:#fff;border:0;border-radius:10px;padding:8px 12px;cursor:pointer}
+.featured__remove:hover{filter:brightness(1.1)}
+@media (max-width:820px){.featured{grid-template-columns:1fr}.featured__img{min-height:200px}}
+.featured-list{display:grid;gap:16px;margin-top:12px}
+
+/* ——— Lightbox ——— */
+.lightbox{
+  position:fixed; inset:0; z-index:1000;
+  background:rgba(0,0,0,.75);
+  display:grid; place-items:center; padding:24px;
+}
+.lightbox__panel{
+  max-width:min(96vw,1200px); max-height:92vh;
+  margin:0; display:grid; gap:10px; align-content:center; justify-items:center;
+}
+.lightbox__img{
+  max-width:min(96vw,1200px); max-height:86vh;
+  width:auto; height:auto; object-fit:contain; object-position:center;
+  border-radius:12px; box-shadow:0 12px 40px rgba(0,0,0,.45); display:block;
+}
+.lightbox__caption{ margin:0; color:#d8dee9; font-size:14px; opacity:.9; text-align:center }
+.lightbox__close{
+  position:absolute; top:10px; right:10px;
+  background:rgba(0,0,0,.5);
+  border:1px solid rgba(255,255,255,.25);
+  color:#fff; padding:6px 10px; border-radius:8px;
+  cursor:pointer; font-size:16px; line-height:1;
+}
+.lightbox__close:hover{ background:rgba(0,0,0,.65) }
+
+/* ——— TagInput ——— */
+.taginput{display:grid;gap:8px}
+.tag{background:#1f6feb22;border:1px solid #1f6feb55;padding:4px 8px;border-radius:999px;font-size:12px}
+.tag span{ font-size:16px }
+
+/* ==== MODALS — prise en charge des 2 variantes (div & dialog) ==== */
+
+/* 1) Variante <div class="modal"> (Gallery.jsx, Events.jsx) */
+.modal{
+  position: fixed; inset: 0; z-index: 1000;
+  display: grid; place-items: center;
+}
+.modal__backdrop{
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.65);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+.modal__panel{
+  position: relative; z-index: 1;
+  width: min(720px, 92vw);
+  max-height: 92vh;
+  overflow: auto;
+  background: #11161d;
+  border: 1px solid #2b3138;
+  border-radius: 16px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.6);
+}
+.modal__tools{
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 12px 8px;
+  border-bottom: 1px solid #2b3138;
+  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+}
+.modal__form{
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+/* 2) Variante <dialog class="modal"> (GalleryModal.jsx) */
+dialog.modal{
+  border: 0;
+  padding: 0;
+  background: transparent;
+  position: fixed; inset: 0; z-index: 1000;
+  display: grid; place-items: center;
+}
+dialog.modal::backdrop{
+  background: rgba(0,0,0,.65);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+/* Le 1er <form method="dialog"> sert de barre outils (X) */
+dialog.modal > form[method="dialog"]{
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 10px 12px;
+}
+dialog.modal > form[method="dialog"] > button{
+  background: rgba(0,0,0,.45);
+  border: 1px solid rgba(255,255,255,.25);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
   cursor: pointer;
 }
-.btn-secondary:hover { background: #2b3138; }
+dialog.modal > form[method="dialog"] > button:hover{
+  background: rgba(0,0,0,.65);
+}
+/* Le 2e <form> (contenu) = panneau */
+dialog.modal > form:not([method="dialog"]){
+  position: relative;
+  width: min(720px, 92vw);
+  max-height: 92vh;
+  overflow: auto;
+  background: #11161d;
+  border: 1px solid #2b3138;
+  border-radius: 16px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.6);
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+@media (max-width: 375px){
+  .modal__panel,
+  dialog.modal > form:not([method="dialog"]){
+    width: min(720px, 96vw);
+    border-radius: 14px;
+  }
+}
+
+/* ==== CatRun (chat de la sidebar) — overrides utiles ==== */
+:root{
+  --catrun-collapsed: 280px;
+  --catrun-expanded:  420px;
+}
+.sidebar{ overflow:visible; }
+.sidebar .sidebar__cat-run{
+  width: var(--catrun-collapsed) !important;
+  transform: rotate(90deg);
+  transform-origin: center;
+  user-select: none;
+  pointer-events: none;
+  align-self: center;
+  margin-bottom: 60px;
+  opacity: .95;
+  transition: width .25s ease, opacity .2s ease;
+}
+.sidebar:hover .sidebar__cat-run{ width: var(--catrun-expanded) !important; }
+
+/* neutralise les contraintes globales d'img */
+.sidebar img.sidebar__cat-run{
+  max-width:none !important;
+  max-height:none !important;
+  height:auto !important;
+  display:block;
+}
+@media (min-width:1440px){
+  :root{ --catrun-collapsed: 320px; --catrun-expanded: 480px; }
+}
+@media (max-width:375px){
+  :root{ --catrun-collapsed: 220px; --catrun-expanded: 280px; }
+}
+
+/* ===== Profile page — typographie & layout ===== */
+.page--profile .profile__title{ margin: 0 0 10px; font-size: clamp(22px, 2.2vw, 28px); }
+.page--profile .profile__ok{ color:#8fda8f; margin: 0 0 8px; }
+
+.profile-grid{
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 360px);
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 900px){
+  .profile-grid{ grid-template-columns: 1fr; }
+}
+
+.page--profile .form label{ font-size: 25px; }
+.page--profile .form input,
+.page--profile .form textarea{ font-size: 1.08rem; }
+
+.page--profile .tag span{ font-size: 18px; } /* tags plus lisibles */
+
+/* Actions (Save / Cancel) sur une ligne, centrées */
+.profile-actions .field__control{
+  display: flex; gap: 14px; align-items: center;
+}
+
+/* Aperçu de la carte à droite */
+.profile-preview{ display: grid; gap: 8px; }
+.profile-preview__title{ margin: 0; font-size: 1.05rem; opacity: .9; }
+.profile-preview__card{
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0f141a;
+  border: 1px solid #2b3138;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+.profile-preview__img{ display: block; width: 100%; height: auto; }
+
+/* ===== Card Theme buttons (yellow / blue / green / red) ===== */
+.profile__themes{
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+
+/* base neutre */
+.theme-btn{
+  appearance: none;
+  border: 1px solid #2a303a;
+  background: #121821;
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  text-transform: capitalize;
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+}
+.theme-btn:hover{ transform: translateY(-1px); }
+.theme-btn[aria-pressed="true"]{ transform: none; }
+
+/* variantes */
+.theme--yellow{ --c:#d0a515; --c2:#f6e08a; }
+.theme--blue  { --c:#1f6feb; --c2:#9ecbff; }
+.theme--green { --c:#2ea043; --c2:#6ee7a0; }
+.theme--red   { --c:#f85149; --c2:#ffb4b0; }
+
+/* état normal */
+.theme--yellow{ border-color: color-mix(in oklab, var(--c) 35%, #2a303a); background: color-mix(in oklab, var(--c) 12%, #121821); }
+.theme--blue  { border-color: color-mix(in oklab, var(--c) 35%, #2a303a); background: color-mix(in oklab, var(--c) 12%, #121821); }
+.theme--green { border-color: color-mix(in oklab, var(--c) 35%, #2a303a); background: color-mix(in oklab, var(--c) 12%, #121821); }
+.theme--red   { border-color: color-mix(in oklab, var(--c) 35%, #2a303a); background: color-mix(in oklab, var(--c) 12%, #121821); }
+
+/* hover */
+.theme-btn:hover.theme--yellow{ border-color: var(--c); background: color-mix(in oklab, var(--c) 18%, #121821); }
+.theme-btn:hover.theme--blue  { border-color: var(--c); background: color-mix(in oklab, var(--c) 18%, #121821); }
+.theme-btn:hover.theme--green { border-color: var(--c); background: color-mix(in oklab, var(--c) 18%, #121821); }
+.theme-btn:hover.theme--red   { border-color: var(--c); background: color-mix(in oklab, var(--c) 18%, #121821); }
+
+/* sélectionné (aria-pressed="true") */
+.theme-btn[aria-pressed="true"].theme--yellow{
+  background: linear-gradient(180deg, color-mix(in oklab, var(--c) 22%, #121821), color-mix(in oklab, var(--c) 8%, #121821));
+  border-color: var(--c);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--c2) 40%, transparent);
+}
+.theme-btn[aria-pressed="true"].theme--blue{
+  background: linear-gradient(180deg, color-mix(in oklab, var(--c) 22%, #121821), color-mix(in oklab, var(--c) 8%, #121821));
+  border-color: var(--c);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--c2) 40%, transparent);
+}
+.theme-btn[aria-pressed="true"].theme--green{
+  background: linear-gradient(180deg, color-mix(in oklab, var(--c) 22%, #121821), color-mix(in oklab, var(--c) 8%, #121821));
+  border-color: var(--c);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--c2) 40%, transparent);
+}
+.theme-btn[aria-pressed="true"].theme--red{
+  background: linear-gradient(180deg, color-mix(in oklab, var(--c) 22%, #121821), color-mix(in oklab, var(--c) 8%, #121821));
+  border-color: var(--c);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--c2) 40%, transparent);
+}

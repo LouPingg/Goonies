@@ -1,3 +1,4 @@
+// goonies/src/App.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext.jsx";
 import DefaultLayout from "./layouts/DefaultLayout.jsx";
@@ -11,23 +12,27 @@ import Events from "./pages/Events.jsx";
 import Profile from "./pages/Profile.jsx";
 import Admin from "./pages/Admin.jsx";
 import Forgot from "./pages/Forgot.jsx";
-import ResetPassword from "./pages/ResetPassword.jsx";
 
-function Protected({ children, admin = false }) {
-  const { user, ready, isAdmin } = useAuth();
-  if (!ready) return <p className="page">Chargement…</p>;
+/* ---------- Guards ---------- */
+
+// Auth required (optionally admin)
+function RequireAuth({ children, admin = false }) {
+  const { user, isAdmin, loading } = useAuth();
+  if (loading) return <p className="page">Loading…</p>;
   if (!user) return <Navigate to="/login" replace />;
   if (admin && !isAdmin) return <Navigate to="/" replace />;
   return children;
 }
 
-// Invités uniquement (si déjà connecté -> redirige vers /)
-function GuestOnly({ children }) {
-  const { user, ready } = useAuth();
-  if (!ready) return <p className="page">Chargement…</p>;
+// Guests only (redirect if already signed in)
+function RequireGuest({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <p className="page">Loading…</p>;
   if (user) return <Navigate to="/" replace />;
   return children;
 }
+
+/* ---------- Routes ---------- */
 
 export default function App() {
   return (
@@ -35,21 +40,21 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
 
-        {/* invité uniquement */}
-        <Route path="/login" element={<GuestOnly><Login /></GuestOnly>} />
-        <Route path="/register" element={<GuestOnly><Register /></GuestOnly>} />
+        {/* Guests */}
+        <Route path="/login" element={<RequireGuest><Login /></RequireGuest>} />
+        <Route path="/register" element={<RequireGuest><Register /></RequireGuest>} />
+        <Route path="/forgot" element={<RequireGuest><Forgot /></RequireGuest>} />
 
-        {/* connecté */}
-        <Route path="/members" element={<Protected><Members /></Protected>} />
-        <Route path="/gallery" element={<Protected><Gallery /></Protected>} />
-        <Route path="/events" element={<Protected><Events /></Protected>} />
-        <Route path="/profile" element={<Protected><Profile /></Protected>} />
-        <Route path="/forgot" element={<Forgot />} />
-<Route path="/reset-password" element={<ResetPassword />} />
+        {/* Authenticated */}
+        <Route path="/members" element={<RequireAuth><Members /></RequireAuth>} />
+        <Route path="/gallery" element={<RequireAuth><Gallery /></RequireAuth>} />
+        <Route path="/events" element={<RequireAuth><Events /></RequireAuth>} />
+        <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
 
-        {/* admin */}
-        <Route path="/admin" element={<Protected admin><Admin /></Protected>} />
+        {/* Admin */}
+        <Route path="/admin" element={<RequireAuth admin><Admin /></RequireAuth>} />
 
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </DefaultLayout>

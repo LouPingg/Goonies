@@ -1,32 +1,176 @@
-/* Layout principal */
-.layout { min-height: 100vh; }
-.content { padding: 24px; margin-left: var(--sidebar-collapsed); transition: margin-left .2s; }
+/* ===========================
+   Layout global + Bannière fixe + Sidebar
+   =========================== */
 
-/* Sidebar (hover pour ouvrir) */
-.sidebar {
-  position: fixed; inset: 0 auto 0 0; width: var(--sidebar-collapsed);
-  background: var(--panel); transition: width .2s; z-index: 5; border-right: 1px solid #222;
-}
-.sidebar:hover { width: var(--sidebar-expanded); }
-.menu { display: flex; flex-direction: column; gap: 8px; padding: 16px; }
-.menu a {
-  text-decoration: none; color: var(--text); opacity: .85;
-  padding: 10px 12px; border-radius: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.menu a.active, .menu a:hover { background: #2b3138; opacity: 1; }
-.menu__logout {
-  margin-top: 8px; text-align: left; background: transparent; border: 0; color: var(--text);
-  padding: 10px 12px; border-radius: 10px; cursor: pointer;
-}
-.menu__logout:hover { background: #2b3138; }
+:root{
+  --panel: #121821;
+  --panel-border: #1e2530;
+  --text: #e6edf3;
+  --muted: #9fb0c2;
 
-/* Banner commune (images dans /public) */
-.banner {
-  position: relative; height: 320px;
-  background-image: url("/image.png"); /* remplace par /goonies-bg.jpg si tu veux */
-  background-size: cover; background-position: center;
-  border-radius: 16px; overflow: hidden; margin-left: calc(var(--sidebar-collapsed) * -1);
+    --catrun-collapsed: 300px;  /* taille quand la sidebar est fermée */
+  --catrun-expanded:  600px;  
+  /* Sidebar widths */
+  --sidebar-collapsed: 84px;
+  --sidebar-expanded: 240px;
+
+  /* Banner height */
+  --banner-h: clamp(200px, 32vw, 360px);
 }
-.banner__overlay { position: absolute; inset: 0; background: linear-gradient(180deg,#00000055,#000000aa); }
-.banner__inner { position: relative; z-index: 1; height: 100%; display: grid; place-items: center; text-align: center; padding: 0 16px; }
-.banner__logo { width: 96px; height: 96px; object-fit: contain; margin-bottom: 8px; }
+
+html,body{
+  margin:0;
+  background:#0b1016;
+  color:var(--text);
+}
+
+.layout{
+  position:relative;
+  min-height:100vh;
+}
+
+/* Underlay logo (fond sous la bannière) — alimenté par --logo-url depuis le JSX */
+.layout::before{
+  content:"";
+  position:fixed;
+  inset: calc(var(--banner-h) - var(--underlay-lift, 600px)) 0 0 0; /* commence sous la bannière */
+  z-index:0;
+  pointer-events:none;
+  background:
+    var(--logo-url) center var(--logo-offset-y, 0px) / var(--logo-size, 2500px) no-repeat,
+    radial-gradient(120% 120% at 50% 40%, #0a0f16, #070b10);
+  opacity: var(--logo-opacity, .40);
+}
+
+/* ===========================
+   Sidebar (déployable au survol)
+   =========================== */
+.sidebar{
+  position:fixed;
+  inset:0 auto 0 0;
+  width:var(--sidebar-collapsed);
+  background:var(--panel);
+  border-right:1px solid var(--panel-border);
+  transition: width .2s ease;
+  z-index:6; /* au-dessus de la bannière */
+  display:flex;
+  flex-direction:column;
+}
+.sidebar:hover{ width:var(--sidebar-expanded); }
+
+.menu{
+  display:flex;
+  flex-direction:column;
+  gap: 50px;                /* espacement compact… */
+  padding: 16px;
+  font-size: 18px;          /* …mais une taille lisible */
+}
+.menu a{
+  display:block;
+  text-decoration:none;
+  color:var(--text);
+  opacity:.9;
+  padding:10px 12px;
+  border-radius:10px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  transition: background .15s ease, opacity .15s ease;
+}
+.menu a:hover,
+.menu a.active{
+  background:#442263;
+  opacity:1;
+}
+
+.menu__logout{
+  margin-top:8px;
+  text-align:left;
+  background:transparent;
+  border:none;     /* ✅ bordure bien visible */
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:18px;
+}
+  
+.menu__logout:hover{ background: #442263 ; }
+
+/* Chat “run” pivoté (image décor) */
+/* Chat “run” pivoté (image décor) */
+.sidebar__cat-run{
+  margin-top: auto;
+  width: var(--catrun-collapsed);
+  transform: rotate(90deg);
+  transform-origin: center;
+  user-select: none;
+  pointer-events: none;
+  align-self: center;
+  margin-bottom: 60px;
+  opacity: .95;
+  transition: width .2s ease, transform .2s ease, opacity .2s ease;
+}
+
+/* quand la sidebar s’ouvre au survol, on agrandit */
+.sidebar:hover .sidebar__cat-run{
+  width: var(--catrun-expanded);
+}
+/* ===========================
+   Zone contenu
+   =========================== */
+.content{
+  position:relative;
+  z-index:1; /* au-dessus du fond */
+  margin-left:var(--sidebar-collapsed);
+  transition: margin-left .2s ease;
+  padding:24px;
+  padding-top: var(--banner-h); /* pousse le contenu sous la bannière FIXE */
+}
+.sidebar:hover ~ .content{ margin-left:var(--sidebar-expanded); }
+
+/* ===========================
+   Bannière FIXE en haut, full-bleed
+   =========================== */
+.banner{
+  position:fixed;
+  top:0; left:0;
+  z-index:5;                 /* sous la sidebar */
+  width:100vw;
+  height:var(--banner-h);
+  background-image: url("/image.png");  /* ajuste si besoin */
+  background-size:cover;
+  background-position:center;
+}
+.banner__overlay{
+  position:absolute; inset:0;
+  background: linear-gradient(180deg, #0000004d, #000000a6);
+}
+.banner__inner{
+  position:relative; height:100%;
+  display:grid; place-items:center; text-align:center;
+  padding:0;
+}
+.banner__inner h1{ letter-spacing: 2px; font-size: clamp(34px, 5vw, 60px); margin-bottom: 150px;}
+.banner__inner p{ margin:0; font-size: clamp(16px, 2.2vw, 30px); color:#c2da14; }
+
+
+
+
+/* ===========================
+   Responsive
+   =========================== */
+@media (max-width: 1440px){
+  .menu{ font-size: 17px; }
+  .sidebar__cat-run{ width: 180px; }
+}
+
+@media (max-width: 900px){
+  .content{ padding:16px; padding-top: var(--banner-h); }
+}
+
+@media (max-width: 375px){
+  :root{ --sidebar-collapsed: 72px; }
+  .menu{ font-size:16px; padding:12px; }
+  .content{ padding:16px 12px; }
+}

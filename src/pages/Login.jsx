@@ -1,49 +1,72 @@
-// src/pages/Login.jsx
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // ⬅️ important
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Login() {
   const { login } = useAuth();
   const nav = useNavigate();
 
-  const [username, setU] = useState("");
-  const [password, setP] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy]       = useState(false);
+  const [err,  setErr]        = useState("");
 
   async function onSubmit(e) {
     e.preventDefault();
     setErr("");
     setBusy(true);
     try {
-      await login({ username: username.trim(), password });
-      nav("/"); // redirection après connexion
-    } catch (e) {
-      setErr(e?.response?.data?.error || e.message || "Échec de connexion");
+      await login(username.trim(), password);
+      nav("/");
+    } catch (e2) {
+      setErr(e2?.response?.data?.error || e2.message || "Login failed");
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <section className="page">
-      <h2>Connexion</h2>
-      {err && <p className="error">{err}</p>}
+    <section className="page auth">
+      <div className="auth__card">
+        <h2 className="text-center">Sign in</h2>
+        {err && <p className="error text-center">{err}</p>}
 
-      <form className="form" onSubmit={onSubmit}>
-        <label>Identifiant
-          <input value={username} onChange={(e) => setU(e.target.value)} disabled={busy} />
-        </label>
-        <label>Mot de passe
-          <input type="password" value={password} onChange={(e) => setP(e.target.value)} disabled={busy} />
-        </label>
-        <button disabled={busy}>Se connecter</button>
-      </form>
+        <form className="form form--grid" onSubmit={onSubmit} noValidate>
+          <label>Username
+            <input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Your username"
+              autoComplete="username"
+              disabled={busy}
+              required
+            />
+          </label>
 
-      <p style={{ marginTop: 8 }}>
-        <Link to="/forgot">Mot de passe oublié ?</Link>
-      </p>
+          <label>Password
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Your password"
+              autoComplete="current-password"
+              disabled={busy}
+              required
+            />
+          </label>
+
+          <div className="field">
+            <div />{/* spacer */}
+            <div className="field__control" style={{ display: "flex", gap: 10 }}>
+              <button type="submit" disabled={busy || !username.trim() || !password}>
+                {busy ? "Signing in…" : "Sign in"}
+              </button>
+              <Link to="/register" className="btn-secondary">Create account</Link>
+              <Link to="/forgot" className="btn-secondary">Forgot password?</Link>
+            </div>
+          </div>
+        </form>
+      </div>
     </section>
   );
 }

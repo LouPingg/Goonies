@@ -1,46 +1,54 @@
-import { useState } from "react";
+// src/components/TagInput.jsx
+import { useRef, useState } from "react";
+import CatButton from "./CatButton";
 
-export default function TagInput({ value = [], onChange, placeholder = "Ajouter un titre (Enter)" }) {
+export default function TagInput({ value = [], onChange, placeholder = "Add a title (Enter)..." }) {
   const [input, setInput] = useState("");
+  const ref = useRef(null);
 
-  function addTag() {
+  function add() {
     const t = input.trim();
     if (!t) return;
-    if (!value.includes(t)) onChange([...value, t]);
+    const next = Array.from(new Set([...(value || []), t]));
+    onChange?.(next);
     setInput("");
-  }
-
-  function onKeyDown(e) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      addTag();
-    }
+    ref.current?.focus();
   }
 
   function remove(tag) {
-    onChange(value.filter((x) => x !== tag));
+    const next = (value || []).filter((x) => x !== tag);
+    onChange?.(next);
+  }
+
+  function onKeyDown(e) {
+    if (e.key === "Enter") { e.preventDefault(); add(); }
+    if (e.key === "Backspace" && !input && value?.length) remove(value[value.length - 1]);
   }
 
   return (
     <div className="taginput">
-      <ul className="taginput__list">
-        {value.map((t) => (
-          <li key={t} className="tag">
-            {t}
-            <button type="button" onClick={() => remove(t)} aria-label={`Supprimer ${t}`}>×</button>
-          </li>
-        ))}
-      </ul>
-
-      <div className="taginput__form">
+      <div className="taginput__row">
         <input
+          ref={ref}
+          className="taginput__input"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
           placeholder={placeholder}
         />
-        <button type="button" onClick={addTag}>Ajouter</button>
+        <CatButton variant="add" label="Add" onClick={add} size={90} showLabel />
       </div>
+
+      {!!value?.length && (
+        <ul className="taginput__list">
+          {value.map((t) => (
+            <li key={t} className="tag">
+              <span>{t}</span>
+              <CatButton variant="delete" size={40} label="Remove" onClick={() => remove(t)} />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

@@ -39,3 +39,24 @@
   max-width: 520px;
 }
 .event-preview img { width: 100%; display: block; }
+
+
+.card__frame{
+  /* garde tes tailles/ratio existants (aspect-ratio ou height) */
+  background: #111;
+  display: flex;               /* centre le média */
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;            /* cache juste les débords éventuels du cadre */
+}
+
+/* L'image ne recadre pas, ne s'étire pas : tient dans le cadre */
+.card__img{
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;                 /* important pour éviter d’étirer */
+  height: auto;
+  object-fit: contain;         /* pas de crop, conserve le ratio */
+  object-position: center;     /* centrée si letterboxing */
+  display: block;
+}

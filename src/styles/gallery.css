@@ -1,43 +1,60 @@
-.gallery__uploader {
-  display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px;
+/* ===========================
+   Galerie — grille 4 colonnes stables + cartes 70/30 + overlay delete
+   =========================== */
+
+/* 4 colonnes stables ; les cartes gardent taille/position même si la ligne est incomplète */
+.gallery-grid{
+  display:grid;
+  gap:16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  list-style:none;
+  padding:0;
+  margin:16px 0 0;
 }
-.upload {
-  display: inline-block; padding: 10px 12px; border: 1px dashed #444; border-radius: 8px; cursor: pointer;
-  background: #0f141a; color: var(--text);
+@media (max-width:1200px){ .gallery-grid{ grid-template-columns:repeat(3, minmax(0,1fr)); } }
+@media (max-width:900px) { .gallery-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+@media (max-width:540px) { .gallery-grid{ grid-template-columns:1fr; } }
+
+/* Carte 70% image / 30% texte */
+.gallery-card{
+  position:relative;
+  display:grid; grid-template-rows:70% 30%;
+  height: clamp(280px, 36vw, 420px);
+  min-width:0;
+  background:#0f141a;
+  border:1px solid #222;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
 }
-.upload:hover { background: #2b3138; }
-.caption {
-  min-width: 220px; flex: 1 1 240px;
-  background:#0f141a; border:1px solid #333; border-radius:10px; padding:10px 12px; color:var(--text);
+.gallery-card .card__frame{
+  overflow:hidden;
+  background:#111;
+  display:flex; align-items:center; justify-content:center;
+  cursor:zoom-in;
+}
+.gallery-card .card__img{
+  max-width:100%; max-height:100%;
+  width:auto; height:auto;
+  object-fit:contain; object-position:center;
+  display:block;
+}
+.gallery-card .card__body{
+  padding:12px;
+  display:grid; align-content:center;
 }
 
-/* Masonry-like fluide via columns */
-.gallery {
-  margin-top: 16px;
-  column-count: 3;
-  column-gap: 12px;
+/* Overlay action (delete) — placement comme “avant” */
+.card__action{ position:absolute; z-index:5; pointer-events:auto; }
+.card__action--delete{
+  top: -30px;
+  right: -50px; /* ⬅️ petit décalage en dehors de la carte */
 }
-.gallery__item {
-  break-inside: avoid; margin-bottom: 12px; position: relative; background:#0f141a; border:1px solid #222; border-radius: 12px; overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,.2);
-}
-.gallery__item img { width: 100%; display: block; }
 
-.gallery__caption {
-  display: flex; justify-content: space-between; align-items: center; gap: 8px;
-  padding: 8px 10px; font-size: 14px; background: #0f141a;
+/* Placeholder (si image KO) */
+.card__placeholder{
+  width:100%; height:100%;
+  display:grid; place-items:center;
+  font-size:12px; color:#6d7a8a;
+  background:#0b1016; border:1px dashed #2a303a;
 }
-.gallery__caption button {
-  background: transparent; border: 0; color: #e6edf3; cursor: pointer; font-size: 16px; line-height: 1;
-}
-.gallery__caption button:hover { color: #ff8080; }
-
-@media (max-width: 900px) { .gallery { column-count: 2; } }
-@media (max-width: 540px) { .gallery { column-count: 1; } }
-
-.muted { opacity: .75; }
-.gallery__actions { display: inline-flex; gap: 8px; }
-.gallery__caption button[aria-label="Éditer"] { color: #9ecbff; }
-.gallery__caption button[aria-label="Éditer"]:hover { color: #c7e1ff; }
-.card__frame { position: relative; }
-.card__img { display: block; width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 1; }

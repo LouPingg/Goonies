@@ -1,0 +1,13 @@
+:root{
+  --bg:#0b1016; --panel:#121821; --panel-border:#1e2530;
+  --text:#e6edf3; --muted:#9fb0c2; --brand:#ffd34d; --danger:#ff5a5f;
+
+  --radius-sm:8px; --radius-md:10px; --radius-lg:16px;
+  --gap-1:8px; --gap-2:12px; --gap-3:16px; --gap-4:24px; --gap-5:40px;
+
+  --fs-base:17px; --fs-sm:.95rem; --fs:1rem; --fs-lg:1.125rem; --fs-xl:1.5rem;
+
+  --container:1100px;
+  --banner-h:clamp(200px,32vw,360px);
+  --sidebar-collapsed:84px; --sidebar-expanded:240px;
+}

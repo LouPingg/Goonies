@@ -1,3 +1,4 @@
+src/pages/ResetPassword.jsx
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import api from "../lib/api";
@@ -13,31 +14,37 @@ export default function ResetPassword() {
 
   async function submit(e) {
     e.preventDefault(); setErr(""); setOk("");
-    if (!token) return setErr("Lien invalide.");
-    if (password.length < 6) return setErr("Mot de passe trop court (min. 6).");
-    if (password !== confirm) return setErr("Les mots de passe ne correspondent pas.");
+    if (!token) return setErr("Invalid link.");
+    if (password.length < 6) return setErr("Password too short (min 6).");
+    if (password !== confirm) return setErr("Passwords do not match.");
     try {
       await api.post("/auth/reset-password", { token, password });
-      setOk("Mot de passe mis à jour.");
+      setOk("Password updated.");
       setTimeout(() => nav("/login"), 1200);
-    } catch (e) { setErr(e?.response?.data?.error || e.message || "Erreur"); }
+    } catch (e2) {
+      setErr(e2?.response?.data?.error || e2.message || "Error");
+    }
   }
 
   return (
     <section className="page">
-      <h2>Réinitialiser le mot de passe</h2>
+      <h2>Reset password</h2>
       {err && <p className="error">{err}</p>}
-      {ok && <p style={{ color: "#8fda8f" }}>{ok}</p>}
+      {ok && <p>{ok}</p>}
+
       <form className="form" onSubmit={submit}>
-        <label>Nouveau mot de passe
+        <label>New password
           <input type="password" value={password} onChange={(e)=>setP(e.target.value)} />
         </label>
-        <label>Confirmer
+        <label>Confirm password
           <input type="password" value={confirm} onChange={(e)=>setC(e.target.value)} />
         </label>
-        <button>Mettre à jour</button>
+        <button>Update password</button>
       </form>
-      <p style={{ marginTop: 8 }}><Link to="/login">Retour connexion</Link></p>
+
+      <p style={{ marginTop: 8 }}>
+        <Link to="/login">Back to sign in</Link>
+      </p>
     </section>
   );
 }

@@ -13,7 +13,7 @@
 /* ≤ 375px : mobile très compact */
 /* ≤ 375px : mode très compact */
 /* ≤ 375px : mode très compact (corrige labels + zones de saisie) */
-@media (max-width:375px){
+@media (max-width:500px){
   /* — Variables — */
   :root{
     --fs-base: 13.5px;
@@ -168,7 +168,7 @@
   /* Tags un peu plus petits */
   .tag span{ font-size:13px; }
 }
-@media (max-width:375px){
+@media (max-width:500px){
   .featured__body{
     padding: 8px !important;
     gap: 4px !important;          /* moins d’espace entre les lignes */

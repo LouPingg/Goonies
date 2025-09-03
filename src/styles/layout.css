@@ -1,6 +1,4 @@
-/* ===========================
-   Layout global + Bannière fixe + Sidebar
-   =========================== */
+
 
 :root{
   --panel: #121821;
@@ -8,13 +6,13 @@
   --text: #e6edf3;
   --muted: #9fb0c2;
 
-    --catrun-collapsed: 300px;  /* taille quand la sidebar est fermée */
+    --catrun-collapsed: 300px;  
   --catrun-expanded:  600px;  
-  /* Sidebar widths */
+ 
   --sidebar-collapsed: 84px;
   --sidebar-expanded: 240px;
 
-  /* Banner height */
+  
   --banner-h: clamp(200px, 32vw, 360px);
 }
 
@@ -29,11 +27,11 @@ html,body{
   min-height:100vh;
 }
 
-/* Underlay logo (fond sous la bannière) — alimenté par --logo-url depuis le JSX */
+
 .layout::before{
   content:"";
   position:fixed;
-  inset: calc(var(--banner-h) - var(--underlay-lift, 600px)) 0 0 0; /* commence sous la bannière */
+  inset: calc(var(--banner-h) - var(--underlay-lift, 600px)) 0 0 0; 
   z-index:0;
   pointer-events:none;
   background:
@@ -42,9 +40,7 @@ html,body{
   opacity: var(--logo-opacity, .40);
 }
 
-/* ===========================
-   Sidebar (déployable au survol)
-   =========================== */
+
 .sidebar{
   position:fixed;
   inset:0 auto 0 0;
@@ -52,7 +48,7 @@ html,body{
   background:var(--panel);
   border-right:1px solid var(--panel-border);
   transition: width .2s ease;
-  z-index:6; /* au-dessus de la bannière */
+  z-index:6; 
   display:flex;
   flex-direction:column;
 }
@@ -61,9 +57,9 @@ html,body{
 .menu{
   display:flex;
   flex-direction:column;
-  gap: 50px;                /* espacement compact… */
+  gap: 50px;                
   padding: 16px;
-  font-size: 18px;          /* …mais une taille lisible */
+  font-size: 18px;         
 }
 .menu a{
   display:block;
@@ -87,7 +83,7 @@ html,body{
   margin-top:8px;
   text-align:left;
   background:transparent;
-  border:none;     /* ✅ bordure bien visible */
+  border:none;     
   color:var(--text);
   padding:10px 12px;
   border-radius:10px;
@@ -97,8 +93,7 @@ html,body{
   
 .menu__logout:hover{ background: #442263 ; }
 
-/* Chat “run” pivoté (image décor) */
-/* Chat “run” pivoté (image décor) */
+
 .sidebar__cat-run{
   margin-top: auto;
   width: var(--catrun-collapsed);
@@ -112,33 +107,29 @@ html,body{
   transition: width .2s ease, transform .2s ease, opacity .2s ease;
 }
 
-/* quand la sidebar s’ouvre au survol, on agrandit */
+
 .sidebar:hover .sidebar__cat-run{
   width: var(--catrun-expanded);
 }
-/* ===========================
-   Zone contenu
-   =========================== */
+
 .content{
   position:relative;
-  z-index:1; /* au-dessus du fond */
+  z-index:1; 
   margin-left:var(--sidebar-collapsed);
   transition: margin-left .2s ease;
   padding:24px;
-  padding-top: var(--banner-h); /* pousse le contenu sous la bannière FIXE */
+  padding-top: var(--banner-h); 
 }
 .sidebar:hover ~ .content{ margin-left:var(--sidebar-expanded); }
 
-/* ===========================
-   Bannière FIXE en haut, full-bleed
-   =========================== */
+
 .banner{
   position:fixed;
   top:0; left:0;
-  z-index:5;                 /* sous la sidebar */
+  z-index:5;                
   width:100vw;
   height:var(--banner-h);
-  background-image: url("/image.png");  /* ajuste si besoin */
+  background-image: url("/image.png");  
   background-size:cover;
   background-position:center;
 }
@@ -157,9 +148,7 @@ html,body{
 
 
 
-/* ===========================
-   Responsive
-   =========================== */
+
 @media (max-width: 1440px){
   .menu{ font-size: 17px; }
   .sidebar__cat-run{ width: 180px; }

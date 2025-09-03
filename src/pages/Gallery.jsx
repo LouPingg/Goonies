@@ -17,7 +17,7 @@ export default function Gallery() {
   const [caption, setCaption] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const [zoom, setZoom] = useState(null); // { url, caption, _id/id }
+  const [zoom, setZoom] = useState(null); 
 
   useEffect(() => {
     let alive = true;
@@ -147,7 +147,7 @@ export default function Gallery() {
         </ul>
       )}
 
-      {/* ADD MODAL */}
+      {}
       {open && (
         <div className="modal" role="dialog" aria-modal="true" aria-label="Add an image">
           <div className="modal__backdrop" onClick={() => !busy && setOpen(false)} />
@@ -203,7 +203,7 @@ export default function Gallery() {
         </div>
       )}
 
-      {/* LIGHTBOX */}
+      {}
       {zoom && (
         <div
           className="lightbox"

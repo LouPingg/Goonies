@@ -1,30 +1,21 @@
-/* src/styles/responsive.css
-   Desktop / tablette: inchangés.
-   Mobile ≤ 375px: correctifs compacts.
-*/
 
-/* ≤ 1440px : retouches légères (conservé) */
 @media (max-width:1440px){
   .menu{ font-size:17px; }
 }
 
-/* ≤ 375px : mobile compact */
-/* ≤ 375px : mobile compact */
-/* ≤ 375px : mobile très compact */
-/* ≤ 375px : mode très compact */
-/* ≤ 375px : mode très compact (corrige labels + zones de saisie) */
+
 @media (max-width:500px){
-  /* — Variables — */
+ 
   :root{
     --fs-base: 13.5px;
     --banner-h: 156px;
     --sidebar-collapsed: 58px;
-    --slot-h: 120px; /* classeur Members */
+    --slot-h: 120px; 
   }
 
   html,body{ overflow-x:hidden; }
 
-  /* Sidebar fermée en mobile */
+  
   .sidebar, .sidebar:hover{ width:var(--sidebar-collapsed) !important; }
   .sidebar:hover ~ .content{ margin-left:var(--sidebar-collapsed) !important; }
 
@@ -39,7 +30,7 @@
     padding-top:var(--banner-h);
   }
 
-  /* ===== Bannière — moins d’espace ===== */
+ 
   .banner__inner h1{
     font-size:20px !important;
     margin:0 0 4px !important;
@@ -52,19 +43,18 @@
     line-height:1.25;
   }
 
-  /* ===== Titres ===== */
+ 
   h1{ font-size:20px !important; }
   h2{ font-size:16px !important; }
   h3{ font-size:14px !important; }
 
-  /* ===== Formulaires (toutes pages) ===== */
-  /* Passe TOUT en 1 colonne */
+ 
   .form--grid label,
   .form--grid .field{
     grid-template-columns:1fr !important;
     margin:6px 0;
   }
-  /* Labels plus petits, wrap activé */
+  
   .form label{
     font-size:.8rem !important;
     line-height:1.2;
@@ -72,7 +62,7 @@
     overflow-wrap:anywhere;
     word-break:break-word;
   }
-  /* Inputs/Textareas beaucoup plus compacts + largeur contrôlée */
+ 
   .form input,
   .form textarea,
   .form select{
@@ -82,13 +72,13 @@
     border-radius:8px !important;
     width:100% !important;
     max-width:100% !important;
-    min-width:0 !important;     /* empêche les débords dans la grille */
+    min-width:0 !important;    
   }
-  /* Textarea : hauteur minimale réduite */
+ 
   .form textarea{
     min-height:72px !important;
   }
-  /* Boutons compacts */
+  
   button, .btn, .btn-secondary{
     font-size:.82rem !important;
     padding:6px 10px !important;
@@ -96,7 +86,7 @@
     border-radius:8px !important;
   }
 
-  /* Champs qui avaient des min-width gênants */
+  
   .event-url,
   .avatar-url{
     min-width:0 !important;
@@ -109,7 +99,7 @@
     font-size:.8rem !important;
   }
 
-  /* ===== Event / Featured cards ===== */
+ 
   .featured{
     grid-template-columns:1fr;
     height:auto !important;
@@ -128,12 +118,12 @@
   .featured__text{
     font-size:12px; line-height:1.25;
     display:-webkit-box; -webkit-box-orient:vertical;
-    -webkit-line-clamp:1; overflow:hidden; /* 1 ligne pour éviter le débord */
+    -webkit-line-clamp:1; overflow:hidden; 
   }
   .featured__meta{ font-size:10.5px; opacity:.7; }
   .featured .catbtn--event{ --s:52px; }
 
-  /* ===== Members (classeur) ===== */
+  
   .binder{ padding:8px; overflow:hidden; }
   .binder__ring{ display:none; }
   .binder__sheet{ margin-left:0; padding:8px; }
@@ -141,13 +131,13 @@
   .pocket{ padding:6px; height:var(--slot-h); }
   .pocket .card__frame{ border-radius:8px; }
 
-  /* ===== Gallery ===== */
+
   .gallery-card{ height:160px; }
   .gallery-card .card__body{ padding:8px; }
   .card__action--delete{ top:6px; right:6px; }
 
-  /* ===== Profile ===== */
-  .page--profile .form label{ font-size:.85rem !important; } /* annule le 25px desktop */
+  
+  .page--profile .form label{ font-size:.85rem !important; }
   .page--profile .profile-preview__card{
     max-width: 200px;
     margin: 0 auto;
@@ -165,13 +155,13 @@
     padding:6px 10px; font-size:.85rem; border-radius:999px;
   }
 
-  /* Tags un peu plus petits */
+  
   .tag span{ font-size:13px; }
 }
 @media (max-width:500px){
   .featured__body{
     padding: 8px !important;
-    gap: 4px !important;          /* moins d’espace entre les lignes */
+    gap: 4px !important;          
     align-items: stretch !important;
     justify-content: flex-start !important;
     text-align: left !important;
@@ -187,7 +177,7 @@
     margin: 0 !important;
     display: -webkit-box !important;
     -webkit-box-orient: vertical !important;
-    -webkit-line-clamp: 1 !important;  /* 1 ligne pour éviter tout débord */
+    -webkit-line-clamp: 1 !important;  
     overflow: hidden !important;
   }
   .featured__meta{
@@ -196,11 +186,10 @@
     margin-top: 2px !important;
   }
 
-  /* Si tu utilises CatButton pour “Delete” */
+ 
   .featured .catbtn--event{ --s: 46px !important; }
-  .featured .catbtn__label{ display: none; } /* pas d’étiquette sous l’icône */
+  .featured .catbtn__label{ display: none; }
 
-  /* Si jamais tu as encore un bouton texte dans une featured */
   .featured .btn, .featured .btn-secondary{
     font-size: 11px !important;
     padding: 6px 8px !important;

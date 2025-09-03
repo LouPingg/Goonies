@@ -56,7 +56,7 @@ export default function Login() {
           </label>
 
           <div className="field">
-            <div />{/* spacer */}
+            <div />{}
             <div className="field__control" style={{ display: "flex", gap: 10 }}>
               <button type="submit" disabled={busy || !username.trim() || !password}>
                 {busy ? "Signing in…" : "Sign in"}

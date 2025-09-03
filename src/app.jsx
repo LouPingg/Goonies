@@ -1,4 +1,4 @@
-// goonies/src/App.jsx
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext.jsx";
 import DefaultLayout from "./layouts/DefaultLayout.jsx";
@@ -13,9 +13,9 @@ import Profile from "./pages/Profile.jsx";
 import Admin from "./pages/Admin.jsx";
 import Forgot from "./pages/Forgot.jsx";
 
-/* ---------- Guards ---------- */
 
-// Auth required (optionally admin)
+
+
 function RequireAuth({ children, admin = false }) {
   const { user, isAdmin, loading } = useAuth();
   if (loading) return <p className="page">Loading…</p>;
@@ -24,7 +24,7 @@ function RequireAuth({ children, admin = false }) {
   return children;
 }
 
-// Guests only (redirect if already signed in)
+
 function RequireGuest({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <p className="page">Loading…</p>;
@@ -32,7 +32,7 @@ function RequireGuest({ children }) {
   return children;
 }
 
-/* ---------- Routes ---------- */
+
 
 export default function App() {
   return (
@@ -40,21 +40,21 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
 
-        {/* Guests */}
+        {}
         <Route path="/login" element={<RequireGuest><Login /></RequireGuest>} />
         <Route path="/register" element={<RequireGuest><Register /></RequireGuest>} />
         <Route path="/forgot" element={<RequireGuest><Forgot /></RequireGuest>} />
 
-        {/* Authenticated */}
+        {}
         <Route path="/members" element={<RequireAuth><Members /></RequireAuth>} />
         <Route path="/gallery" element={<RequireAuth><Gallery /></RequireAuth>} />
         <Route path="/events" element={<RequireAuth><Events /></RequireAuth>} />
         <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
 
-        {/* Admin */}
+        {}
         <Route path="/admin" element={<RequireAuth admin><Admin /></RequireAuth>} />
 
-        {/* Fallback */}
+        {}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </DefaultLayout>

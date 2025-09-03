@@ -1,4 +1,4 @@
-// src/pages/Profile.jsx
+
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import TagInput from "../components/TagInput";
@@ -10,27 +10,27 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
 export default function Profile() {
   const { user, updateProfile } = useAuth();
 
-  // Server snapshot
+  
   const [serverUser, setServerUser] = useState(user || null);
 
-  // Editable state
+ 
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [avatarUrl,   setAvatarUrl]   = useState(user?.avatarUrl   || "");
   const [titles,      setTitles]      = useState(Array.isArray(user?.titles) ? user.titles : []);
   const [bio,         setBio]         = useState(user?.bio || "");
   const [cardTheme,   setCardTheme]   = useState(user?.cardTheme || "yellow");
 
-  // File + local preview + temporary Cloudinary URL
+ 
   const [file, setFile]               = useState(null);
   const [filePreview, setFilePreview] = useState("");
   const [tempAvatar, setTempAvatar]   = useState("");
 
-  // UI
+
   const [busy, setBusy] = useState(false);
   const [err,  setErr]  = useState("");
   const [ok,   setOk]   = useState("");
 
-  // sync user -> local state
+  
   useEffect(() => {
     if (!user) return;
     setServerUser(user);
@@ -44,7 +44,7 @@ export default function Profile() {
     setTempAvatar("");
   }, [user]);
 
-  // local blob preview
+ 
   useEffect(() => {
     if (!file) { setFilePreview(""); return; }
     const url = URL.createObjectURL(file);
@@ -111,7 +111,7 @@ export default function Profile() {
     setErr(""); setOk("");
   }
 
-  // Live preview
+  
   const previewUrl = useMemo(() => {
     const params = new URLSearchParams();
     params.set("theme", cardTheme || "yellow");
@@ -135,7 +135,7 @@ export default function Profile() {
       {ok && <p className="profile__ok">{ok}</p>}
 
       <div className="profile-grid">
-        {/* Formulaire 2 colonnes */}
+        {}
         <form className="form form--grid" onSubmit={onSubmit} encType="multipart/form-data" noValidate>
           <label>Display name
             <input value={displayName} onChange={(e)=>setDisplayName(e.target.value)} disabled={busy} />
@@ -231,7 +231,7 @@ export default function Profile() {
           </div>
         </form>
 
-        {/* Aperçu live */}
+        {}
         <div className="profile-preview">
           <h3 className="profile-preview__title">Preview</h3>
           <div className="profile-preview__card">

@@ -1,6 +1,4 @@
-/* === Classeur Pokémon (page Members) === */
 
-/* hauteur homogène d’un slot, responsive */
 :root { --slot-h: clamp(300px, 28vw, 420px); }
 
 .binder {
@@ -14,7 +12,6 @@
   box-shadow: inset 0 1px 0 #1a1f27, 0 10px 30px rgba(0,0,0,0.35);
 }
 
-/* anneaux décor */
 .binder__ring {
   position: absolute; left: 12px; top: 24px; bottom: 24px; width: 20px;
   background:
@@ -40,10 +37,9 @@
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.35);
 }
 
-/* 3x3 fixe (pagi 9 par page) */
+
 .pockets { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
-/* Chaque pochette a EXACTEMENT la même hauteur */
 .pocket {
   position: relative;
   border-radius: 12px;
@@ -68,7 +64,7 @@
     0 16px 28px rgba(0,0,0,0.45);
 }
 
-/* reflet plastique */
+
 .pocket__shine {
   pointer-events: none;
   position: absolute; inset: 0; border-radius: 12px;
@@ -78,11 +74,11 @@
   mix-blend-mode: screen;
 }
 
-/* Carte à l’intérieur: occupe toute la hauteur disponible */
+
 .pocket .card { height: 100%; display: flex; flex-direction: column; background:#11161d; border-color:#232a36; box-shadow:0 6px 14px rgba(0,0,0,0.35); }
 .pocket .card__frame { flex: 1 1 auto; min-height: 0; border-radius: 10px; overflow: hidden; }
 
-/* Slots vides: même taille + style */
+
 .pocket--empty {
   height: var(--slot-h);
   display: block;
@@ -108,7 +104,7 @@
 .page { 
   margin-right: 460px;
 }
-/* Pager */
+
 .pager {
   margin-top: 14px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px;
 }
@@ -126,11 +122,11 @@
 .membercard__avatar { width:80px; height:80px; border-radius:50%; object-fit:cover; }
 .membercard__name { margin-top:8px; font-weight:600; opacity:.9; }
 
-/* Header: title + search stacked */
+
 .members_header {
   display: flex;
-  flex-direction: column;   /* <— pile en colonne */
-  align-items: flex-start;  /* aligne le formulaire à gauche */
+  flex-direction: column;   
+  align-items: flex-start;  
 
   margin-bottom: 52px;
   margin-top: 60px;
@@ -143,7 +139,7 @@
   align-items: center;
 }
 
-/* nettoie les marges du titre et borne la largeur du form */
+
 .members__header h1,
 .members__header h2 { margin: 20px; }
 
@@ -152,7 +148,6 @@
   width: 100%;
 }
 
-/* un peu plus serré sur petits écrans */
 @media (max-width: 560px) {
   .members__header { gap: 6px; margin-bottom: 10px; }
 }

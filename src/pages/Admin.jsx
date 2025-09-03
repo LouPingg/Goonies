@@ -115,7 +115,7 @@ export default function Admin() {
     }
   }
 
-  // Set password
+  
   function openPwd(u) {
     setPwdFor(u);
     setNewPwd("");
@@ -187,7 +187,7 @@ export default function Admin() {
       <h2>Administration</h2>
       {err && <p className="error">{err}</p>}
 
-      {/* Allowlist */}
+      {}
       <div style={{ display: "grid", gap: 8, marginBottom: 24 }}>
         <h3>Allowlist (usernames allowed to register)</h3>
         <form className="form" onSubmit={addAllow}>
@@ -218,7 +218,7 @@ export default function Admin() {
         )}
       </div>
 
-      {/* Accounts */}
+      {}
       <div style={{ display: "grid", gap: 8 }}>
         <h3>Accounts</h3>
         {usersLoading ? (

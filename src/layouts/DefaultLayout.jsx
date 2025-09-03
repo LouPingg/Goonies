@@ -1,4 +1,4 @@
-// src/layouts/DefaultLayout.jsx
+
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
 
@@ -10,7 +10,7 @@ export default function DefaultLayout({ children }) {
     <div
       className="layout"
       style={{
-        /* 1) URLs dynamiques compatibles GH Pages */
+       
         "--logo-url": `url('${base}logo.png')`,
         "--banner-url": `url('${base}image.png')`,
       }}
@@ -34,7 +34,7 @@ export default function DefaultLayout({ children }) {
           )}
         </nav>
 
-        {/* chat “run” pivoté */}
+        {}
         <img
           className="sidebar__cat-run"
           src={`${base}assets/cats/run.png`}
@@ -46,7 +46,7 @@ export default function DefaultLayout({ children }) {
       </aside>
 
       <main className="content">
-        {/* Bannière FIXE en haut, full-bleed */}
+        {}
         <div className="banner">
           <div className="banner__overlay" />
           <div className="banner__inner">

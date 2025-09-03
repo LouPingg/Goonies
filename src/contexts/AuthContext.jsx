@@ -4,13 +4,12 @@ import api from "../lib/api";
 const AuthCtx = createContext(null);
 
 export function AuthProvider({ children }) {
-  // token lu au démarrage
+  
   const [token, setToken] = useState(() => localStorage.getItem("goonies_token"));
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(!!token); // ⬅️ si token présent, on charge /users/me
+  const [loading, setLoading] = useState(!!token); 
   const isAdmin = user?.role === "admin";
 
-  // à chaque changement de token, on tente /users/me
   useEffect(() => {
     let cancelled = false;
 
@@ -45,8 +44,8 @@ export function AuthProvider({ children }) {
   async function login(username, password) {
     const { data } = await api.post("/auth/login", { username, password });
     localStorage.setItem("goonies_token", data.token);
-    setToken(data.token);   // ⬅️ déclenche loadMe()
-    setUser(data.user);     // ⬅️ UI réactive immédiatement
+    setToken(data.token);   
+    setUser(data.user);    
     return data.user;
   }
 

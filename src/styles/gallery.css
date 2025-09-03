@@ -1,8 +1,4 @@
-/* ===========================
-   Galerie — grille 4 colonnes stables + cartes 70/30 + overlay delete
-   =========================== */
 
-/* 4 colonnes stables ; les cartes gardent taille/position même si la ligne est incomplète */
 .gallery-grid{
   display:grid;
   gap:16px;
@@ -15,7 +11,7 @@
 @media (max-width:900px) { .gallery-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
 @media (max-width:540px) { .gallery-grid{ grid-template-columns:1fr; } }
 
-/* Carte 70% image / 30% texte */
+
 .gallery-card{
   position:relative;
   display:grid; grid-template-rows:70% 30%;
@@ -44,46 +40,43 @@
   display:grid; align-content:center;
 }
 
-/* Overlay action (delete) — placement comme “avant” */
+
 .card__action{ position:absolute; z-index:5; pointer-events:auto; }
 .card__action--delete{
   top: -30px;
-  right: -50px; /* ⬅️ petit décalage en dehors de la carte */
+  right: -50px; 
 }
 
-/* Placeholder (si image KO) */
+
 .card__placeholder{
   width:100%; height:100%;
   display:grid; place-items:center;
   font-size:12px; color:#6d7a8a;
   background:#0b1016; border:1px dashed #2a303a;
 }
-/* --- Fix bouton delete visible sur les cartes de la galerie --- */
 
-/* Autorise l’overlay à dépasser si on le souhaite (optionnel) */
 .gallery-card{
-  position: relative;  /* au cas où */
-  overflow: visible;   /* ← évite la coupe de l’overlay */
+  position: relative; 
+  overflow: visible;   
 }
 
-/* Overlay toujours au-dessus et cliquable */
+
 .card__action{
   position: absolute;
   z-index: 10;
   pointer-events: auto;
 }
 
-/* Place le delete **à l'intérieur** du coin haut-droit de la carte */
+
 .card__action--delete{
-  top: 0px;            /* ← au lieu de -30px */
-  right: 90px;          /* ← au lieu de -50px */
+  top: 0px;           
+  right: 90px;        
 }
 
-/* Taille du CatButton + pas d’étiquette pour garder ça propre */
-.card__action--delete .catbtn{ --s: 64px; }    /* ajuste 56→64 si tu veux plus gros */
+
+.card__action--delete .catbtn{ --s: 64px; }    
 .card__action--delete .catbtn__label{ display: none; }
 
-/* Sur mobile (375px), un peu plus petit */
 @media (max-width:375px){
   .card__action--delete .catbtn{ --s: 44px; }
 }

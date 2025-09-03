@@ -1,4 +1,4 @@
-// src/pages/Home.jsx
+
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import api from "../lib/api";
@@ -9,21 +9,21 @@ import "../styles/home.css";
 
 export default function Home() {
   const { user, isAdmin } = useAuth();
-  const [active, setActive] = useState([]);     // évènements en cours/actifs
-  const [future, setFuture] = useState([]);     // évènements à venir (triés)
+  const [active, setActive] = useState([]);     
+  const [future, setFuture] = useState([]);     
   const [err, setErr] = useState("");
 
-  // Charger actifs + tous, puis dériver “future”
+  
   useEffect(() => {
     (async () => {
       try {
         setErr("");
-        // actifs
+        
         const act = await api.get("/events/active");
         const actList = Array.isArray(act.data) ? act.data : [];
         setActive(actList);
 
-        // tous (pour “future”)
+        
         const all = await api.get("/events");
         const now = Date.now();
         const fut = (all.data || [])
@@ -36,13 +36,12 @@ export default function Home() {
     })();
   }, []);
 
-  // Évènement “featured” = le 1er actif, sinon le prochain à venir
   const featured = useMemo(() => {
     if (active.length > 0) return active[0];
     return future[0] || null;
   }, [active, future]);
 
-  // “upcoming extra” = 2 suivants (excluant le featured)
+  
   const upcomingExtras = useMemo(() => {
     const list = [...future];
     if (!featured) return list.slice(0, 2);
@@ -51,11 +50,10 @@ export default function Home() {
       .slice(0, 2);
   }, [future, featured]);
 
-  // droits
+
   const canRemove = (ev) =>
     !!ev && !!user && (isAdmin || ev.createdBy === user._id || ev.createdBy === user.id);
 
-  // compte à rebours pour le bloc “featured” uniquement
   const startCd = useCountdown(featured?.startAt, "until");
   const endCd   = useCountdown(featured?.endAt,   "until");
 
@@ -76,7 +74,7 @@ export default function Home() {
     <section className="home">
       {err && <p className="error mb-8">{err}</p>}
 
-      {/* === Featured (actif ou prochain) === */}
+      {}
       {featured ? (
         <div className="featured">
           {featured.imageUrl ? (
@@ -115,7 +113,7 @@ export default function Home() {
         <p className="muted text-center">No featured event right now.</p>
       )}
 
-      {/* === (Option) afficher aussi 2 prochains évènements === */}
+      {}
       {upcomingExtras.length > 0 && (
         <div className="featured-list">
           {upcomingExtras.map(ev => (

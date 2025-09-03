@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import api from "../lib/api";
 import "../styles/members.css";
 
-const PAGE_SIZE = 9; // 3x3
+const PAGE_SIZE = 9; 
 
 export default function Members() {
   const [input, setInput] = useState("");

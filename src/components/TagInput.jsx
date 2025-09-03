@@ -1,4 +1,4 @@
-// src/components/TagInput.jsx
+
 import { useRef, useState } from "react";
 import CatButton from "./CatButton";
 
